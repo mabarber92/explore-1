@@ -68,7 +68,7 @@ function App() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [rows, setRows] = useState([]);
-  const [defaultReleaseCode, setDefaultReleaseCode] = useState("2022.2.7");
+  const [defaultReleaseCode, setDefaultReleaseCode] = useState("2023.1.8");
   const [releaseCode, setReleaseCode] = useState(defaultReleaseCode);
   const [status, setStatus] = useState(false);
   const [query, setQuery] = useState("");
@@ -134,6 +134,8 @@ function App() {
 
   const bookSectionRef = useRef();
   const [isFileUploaded, setIsFileUploaded] = useState(false);
+  const [showTickSizeInput, setShowTickSizeInput] = useState(false);
+  const [tickFontSize, setTickFontSize] = useState(12);
   const [isFlipped, setIsFlipped] = useState(false);
   const [flipTimeLoading, setFlipTimeLoading] = useState(false);
   const focusMilestone1 = useRef();
@@ -226,30 +228,31 @@ function App() {
     setIsOpenDrawer(true);
   };
 
-  const downloadPNG = (downloadFileName, svgId) => {
+  const downloadPNG = (downloadFileName, svgId, includeURL=false) => {
     //const downloadFileName = `${metaData?.book1?.versionCode}_${metaData?.book2?.versionCode}.png`;
     const svg = document.getElementById(svgId);
     const newSvg = svg.cloneNode(true);
 
-    // create a text element in the svg that shows the URL:
-
-    var textElement = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "text"
-    );
-    textElement.setAttribute(
-      "x",
-      svg.clientWidth - (window.location.origin + url).length * 7.5
-    ); // X-coordinate
-    textElement.setAttribute("y", 20); // Y-coordinate
-    textElement.setAttribute("font-size", "14px"); // Font size
-    textElement.setAttribute("fill", "black"); // Fill color
-    // Create a text node with the text content
-    var textNode = document.createTextNode(window.location.origin + url);
-    // Append the text node to the <text> element
-    textElement.appendChild(textNode);
-    // Append the <text> element to the SVG
-    newSvg.appendChild(textElement);
+    if (includeURL) {
+      // create a text element in the svg that shows the URL:
+      var textElement = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+      textElement.setAttribute(
+        "x",
+        svg.clientWidth - (window.location.origin + url).length * 7.5
+      ); // X-coordinate
+      textElement.setAttribute("y", 20); // Y-coordinate
+      textElement.setAttribute("font-size", "14px"); // Font size
+      textElement.setAttribute("fill", "black"); // Fill color
+      // Create a text node with the URL
+      var textNode = document.createTextNode(window.location.origin + url);
+      // Append the text node to the <text> element
+      textElement.appendChild(textNode);
+      // Append the <text> element to the SVG
+      newSvg.appendChild(textElement);
+    }
 
     // save the png:
     saveSvgAsPng.saveSvgAsPng(newSvg, downloadFileName, {
@@ -312,6 +315,10 @@ function App() {
         dataLoading,
         setDataLoading,
         bookSectionRef,
+        showTickSizeInput, 
+        setShowTickSizeInput,
+        tickFontSize, 
+        setTickFontSize,
         isFlipped,
         setIsFlipped,
         flipTimeLoading,

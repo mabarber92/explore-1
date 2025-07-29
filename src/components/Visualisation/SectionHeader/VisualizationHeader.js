@@ -2,6 +2,7 @@ import { Box, Button, IconButton, Link, Tooltip } from "@mui/material";
 import React, { useContext } from "react";
 import { Context } from "../../../App";
 import FlipButton from "./FlipButton";
+import TickFontSizeControl from "./TickFontSizeControl";
 import ScatterLegend from "../MultiChart/ScatterLegend";
 
 
@@ -71,6 +72,7 @@ const VisualizationHeader = ({ restoreCanvas, isPairwiseViz, downloadFileName, c
               <i className="fa-solid fa-arrows-rotate"></i>
             </Button>
           </Tooltip>
+          {isPairwiseViz ? <FlipButton /> : ""}
           <Tooltip title="Download Chart as PNG" placement="top">
             <Button
               onClick={handleDownload}
@@ -95,7 +97,7 @@ const VisualizationHeader = ({ restoreCanvas, isPairwiseViz, downloadFileName, c
               <i className="fa-solid fa-cloud-arrow-down"></i>
             </Button>
           </Tooltip>
-          {isPairwiseViz ? <FlipButton /> : ""}
+          {isPairwiseViz ? <TickFontSizeControl svgSelector="#svgChart" /> : ""}
         </Box>
       </Box>
     </Box>

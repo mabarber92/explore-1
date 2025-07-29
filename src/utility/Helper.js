@@ -7,6 +7,65 @@ const pad = (n, width, z) => {
   return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 };
 
+/**
+ * Remove the page parameter from a querystring
+ * @param {Object} searchParams querystring object
+ * @returns Object
+ */
+const cleanSearchPagination = (searchParams) => {
+  return Object.fromEntries([...searchParams].filter(([key]) => key !== "page"));
+}
+
+/**
+ * Calculate the x and y coordinates of a tooltip
+ * @param {Event} event The Event object that contains information on where the mouse hovers
+ * @param {Element} tooltipDiv The tooltip element itself
+ * @param {String} tooltipMsg The text content of the tooltip
+ * @param {String} containerID The ID of the container in which the graph is found
+ * @returns Array (x, y)
+ */
+function calculateTooltipPos(event, tooltipDiv, tooltipMsg, containerID){
+  const containerRect = document.getElementById(containerID).getBoundingClientRect();
+  let x = event.pageX - containerRect.left - window.scrollX + 15;
+  let y = event.pageY - containerRect.top - window.scrollY + 10;
+  // 2. Temporarily set the tooltip text so we can measure it
+  const tooltipNode = tooltipDiv.node();
+  tooltipDiv.html(tooltipMsg).style("opacity", 0.9);
+  // 3. Measure the tooltip
+  const tooltipWidth = tooltipNode.offsetWidth;
+  const tooltipHeight = tooltipNode.offsetHeight;
+  const containerWidth = containerRect.width;
+  const viewportHeight = window.innerHeight;
+  // 4. Adjust X: flip to left if overflowing to the right
+  if (x + tooltipWidth > containerWidth) {
+    x = Math.max(0, x - tooltipWidth - 30); // flip to left side if possible
+  }
+  // Adjust Y: flip to above if overflowing to the bottom
+  const pageY = event.pageY; // relative to full document
+  const tooltipBottom = pageY + tooltipHeight + 10;
+  if (tooltipBottom > viewportHeight + window.scrollY) {
+    y = event.pageY - containerRect.top - window.scrollY - tooltipHeight - 10;
+  }
+  return [x, y];
+}
+
+/** Get the highest value for a key in an array of objects
+ * 
+ * @param {Array} arr 
+ * @param {String} key 
+ * @returns Integer
+ */
+function getHighestValueInArrayOfObjects(arr, key){
+  let highest = -Infinity;
+  for (let i=0; i<arr.length; i++){
+    let n = parseInt(arr[i][key]);
+    if (n > highest) {
+      highest = n;
+    }
+  }
+  return highest;
+}
+
 /*
 function to  takes author death date as the parameter to return a padded repo URL
 */
@@ -245,6 +304,9 @@ function bisectLeft(array, value) {
 }
 
 export {
+  getHighestValueInArrayOfObjects,
+  calculateTooltipPos,
+  cleanSearchPagination,
   pad,
   renameKeys,
   deleteKey,
