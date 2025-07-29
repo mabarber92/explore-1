@@ -20,7 +20,7 @@ jobs:
           node-version: 22.17.1  # or whatever version your project uses
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build the app
         run: npm run build
