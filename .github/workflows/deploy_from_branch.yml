@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages from main branch
+name: Deploy to GitHub Pages from chosen branch
 
 on:
   workflow_dispatch:
