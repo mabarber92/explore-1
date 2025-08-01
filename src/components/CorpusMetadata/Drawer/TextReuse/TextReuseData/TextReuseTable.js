@@ -317,7 +317,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                     ) : null
                     }
                     { fullDataExists ? (
-                    <Tooltip placement="top" title={"Download CSV"}>
+                    <Tooltip placement="top" title={"Download CSV (with text of alignments)"}>
                       <Typography>
                         <IconButton
                           sx={{
@@ -337,7 +337,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                     ) : null
                     }
                     { useGithubUrl || liteDataExists ? (
-                    <Tooltip placement="top" title={"Download Lite CSV"}>
+                    <Tooltip placement="top" title={"Download Lite CSV (excluding text of alignments)"}>
                       <Typography>
                         <IconButton
                           sx={{
