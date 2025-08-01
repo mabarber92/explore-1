@@ -281,7 +281,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                           }}
                           onClick={() => downloadPairwiseCsv(b1Metadata, item.id)}
                         >
-                          <i className="fa-solid fa-file-csv"></i>
+                          <i className="fa-solid fa-file"></i>
                         </IconButton>
 
                       </Typography>
