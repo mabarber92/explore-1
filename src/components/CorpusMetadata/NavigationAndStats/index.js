@@ -85,6 +85,8 @@ const NavigationAndStats = () => {
     if (!booksReady) return;
     const checkSelectedUrls = async () => {
 
+      
+
       if (checkedBooks.length !== 2) {
         // If we have not selected two books, then set these pairwise parameters to null
         setPairwiseLiteUrl(null);
@@ -95,7 +97,7 @@ const NavigationAndStats = () => {
         }
       else {
         console.log("Checking selected books for pairwise text reuse data");
-        
+
         // Activate the loading function - allows us to show a loading spinner after a delay (to avoid flickering)
         setLoadingReuseData(true);
         
@@ -119,6 +121,7 @@ const NavigationAndStats = () => {
         setPairwiseUrl(urlObj.pairwiseUrl);
         setPairwiseLiteUrl(urlObj.pairwiseLiteUrl);
         setGithubUrl(urlObj.githubUrl);
+
 
         // // Create URLs for the selected books - if URL returns a response, then we set the variable
         // const LiteUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, true);
