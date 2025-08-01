@@ -3,13 +3,9 @@ import { Box, CircularProgress, IconButton, Tooltip, Typography } from "@mui/mat
 import TableHeader from "./TableHeader";
 import { getVersionMetadataById } from "../../../../../services/CorpusMetaData";
 import {  getOneBookReuseStats } from "../../../../../services/TextReuseData";
-import { buildPairwiseCsvURL, checkPairwiseCsvResponse, enableMockFetch } from "../../../../../utility/Helper";
+import { buildPairwiseCsvURL, checkPairwiseCsvResponse } from "../../../../../utility/Helper";
 import { Context } from "../../../../../App";
 import Papa from "papaparse";
-import { 
-  // lightSrtFolders, 
-  // srtFoldersGitHub, 
-  srtFolders } from "../../../../../assets/srtFolders";
 
 const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1MetadataLoading }) => { 
   const { isOpenDrawer, setIsOpenDrawer } = useContext(Context);
@@ -29,10 +25,8 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
     // Prevent from running at closing of the drawer
     if (!isOpenDrawer) return;
     // If we have book1 - check what kind of data can be fetched (is the server live or are we defaulting to GitHub?)
-    if (b1Metadata && b1Metadata.version_uri) {
-      
+    if (b1Metadata && b1Metadata.version_uri) {      
       const releaseCode = JSON.parse(localStorage.getItem("release_code"));
-      enableMockFetch({ failForMatch: srtFolders[releaseCode] }); 
       const checkServerResponse = async (book1) => {
         const csvObj = await checkPairwiseCsvResponse(releaseCode, book1);
         if (csvObj.githubUrl) {
@@ -298,6 +292,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                     display={"flex"}
                     alignItems={"center"}
                   >
+                    { useGithubUrl || liteDataExists ? (
                     <Tooltip placement="top" title={"Visualization"}>
                       <Typography>
                         <button
@@ -319,7 +314,9 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                         </button>
                       </Typography>
                     </Tooltip>
-
+                    ) : null
+                    }
+                    { fullDataExists ? (
                     <Tooltip placement="top" title={"Download CSV"}>
                       <Typography>
                         <IconButton
@@ -337,7 +334,9 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
 
                       </Typography>
                     </Tooltip>
-
+                    ) : null
+                    }
+                    { useGithubUrl || liteDataExists ? (
                     <Tooltip placement="top" title={"Download Lite CSV"}>
                       <Typography>
                         <IconButton
@@ -355,6 +354,8 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
 
                       </Typography>
                     </Tooltip>
+                    ) : null
+                  }
                   </Box>
                 </Box>
               )
