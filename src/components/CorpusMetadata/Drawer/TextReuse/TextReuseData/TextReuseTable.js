@@ -174,14 +174,31 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
     // build the URL to the CSV file:
     const csvUrl = await buildPairwiseCsvURL(releaseCode, b1Metadata, b2Metadata, light, github);
     const csvFilename = csvUrl.split("/").pop();
-    // create a temporary link to the csv file to trigger the download:
-    const link = document.createElement('a');
-    link.href = csvUrl;
-    link.setAttribute('download', csvFilename); 
-    document.body.appendChild(link);
-    // download and clean up:
-    link.click();
-    document.body.removeChild(link);
+    if (github) {
+        // If the URL is a GitHub URL, then we need to download it differently
+        const response = await fetch(csvUrl);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", csvFilename); // Set the file name for download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+       }
+    else {
+      // create a temporary link to the csv file to trigger the download:
+      const link = document.createElement('a');
+      link.href = csvUrl;
+      link.setAttribute('download', csvFilename); 
+      document.body.appendChild(link);
+      // download and clean up:
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
   /**
@@ -331,7 +348,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                             fontSize: "18px",
                             color: "#7593af",
                           }}
-                          onClick={() => downloadPairwiseCsv(b1Metadata, item.id, true)}
+                          onClick={() => downloadPairwiseCsv(b1Metadata, item.id, true, useGithubUrl)}
                         >
                           <i className="fa-solid fa-file-half-dashed"></i>
                         </IconButton>
