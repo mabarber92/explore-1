@@ -294,10 +294,10 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                     display={"flex"}
                     alignItems={"center"}
                   >
-                    { useGithubUrl === null || fullDataExists === null || liteDataExists === null ? (<CircularProgress size={"15px"} />)
+                  { useGithubUrl === null || fullDataExists === null || liteDataExists === null ? (<CircularProgress size={"15px"} />)
                     : (
-                      <>
-                      { useGithubUrl || liteDataExists ? (
+                    <>
+                    { useGithubUrl || liteDataExists ? (
                     <Tooltip placement="top" title={"Visualization"}>
                       <Typography>
                         <button
@@ -360,9 +360,8 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                       </Typography>
                     </Tooltip>
                     ) : null}
-                    </>
-                  )
-                }
+                    </>)
+                  }
                   </Box>
                 </Box>
               )
