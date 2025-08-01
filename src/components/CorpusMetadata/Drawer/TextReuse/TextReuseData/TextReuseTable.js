@@ -132,13 +132,13 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
    * @param {Object} b1Metadata full metadata of book1
    * @param {Object} book2ID version ID of book2
    */
-  const downloadPairwiseCsv = async (b1Metadata, book2ID) => {
+  const downloadPairwiseCsv = async (b1Metadata, book2ID, light=false, github=false) => {
     // we already have full metadata of book1;
     // download the metadata for book 2 and get the ID:
     const releaseCode = JSON.parse(localStorage.getItem("release_code"));
     const b2Metadata = await getVersionMetadataById(releaseCode, book2ID);
     // build the URL to the CSV file:
-    const csvUrl = await buildPairwiseCsvURL(releaseCode, b1Metadata, b2Metadata);
+    const csvUrl = await buildPairwiseCsvURL(releaseCode, b1Metadata, b2Metadata, light, github);
     const csvFilename = csvUrl.split("/").pop();
     // create a temporary link to the csv file to trigger the download:
     const link = document.createElement('a');
@@ -218,7 +218,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                   }}
                 >
                   <Typography
-                    width={"80%"}
+                    width={"70%"}
                     padding={"0px 15px"}
                     sx={{
                       wordWrap: "break-word",
@@ -242,7 +242,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                     {item?.alignments}
                   </Typography>
                   <Box
-                    width={"10%"}
+                    width={"20%"}
                     padding={"0px 15px"}
                     display={"flex"}
                     alignItems={"center"}
@@ -282,6 +282,24 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                           onClick={() => downloadPairwiseCsv(b1Metadata, item.id)}
                         >
                           <i className="fa-solid fa-file"></i>
+                        </IconButton>
+
+                      </Typography>
+                    </Tooltip>
+
+                    <Tooltip placement="top" title={"Download Lite CSV"}>
+                      <Typography>
+                        <IconButton
+                          sx={{
+                            background: "none",
+                            border: "0px",
+                            cursor: "pointer",
+                            fontSize: "18px",
+                            color: "#7593af",
+                          }}
+                          onClick={() => downloadPairwiseCsv(b1Metadata, item.id, true)}
+                        >
+                          <i className="fa-solid fa-file-half-dashed"></i>
                         </IconButton>
 
                       </Typography>
