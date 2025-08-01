@@ -11,7 +11,7 @@ let originalFetch = null;
 
 function enableMockFetch({ failForMatch = "" } = {}) {
   if (originalFetch) return; // already mocked
-
+  console.log(`[MockFetch] Mocking fetch to fail for: ${failForMatch}`);
   originalFetch = global.fetch;
 
   global.fetch = async (url, options) => {
@@ -49,23 +49,38 @@ const urlExists = async (url) => {
  * Check the response for a pairwise csv - fallback to GitHub if not found
  * @param {String} releaseCode OpenITI release version code
  * @param {String} book1 metadata obj book 1
- * @param {String} book2 metadata obj book 2
+ * @param {String} book2 metadata obj book 2 (if no book2 is provided, it will just check for the parent folder)
  * @param {Boolean} full If true, check for full text reuse data
  *  
  * @returns {Object} {"pairwiseUrl": String, "pairwiseLiteUrl": String, "githubUrl": boolean}
  * If the response fails for either URL, it will return null for that field. If it returns a githubUrl, then githubUrl will be true
  */
 
-const checkPairwiseCsvResponse = async (releaseCode, book1, book2, full=false) => {
+const checkPairwiseCsvResponse = async (releaseCode, book1, book2=null, full=false) => {
   // Set pairwise lite URL as null - in case we do not find it
-  const pairwiseLiteUrl = null;
+  let pairwiseLiteUrl = null;
   // If full is true check for full and set full and lite URLs accordingly
-  if (full) {
-    const pairwiseFullUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, false);
+  if (full || book2 === null) {
+    let pairwiseFullUrl
+    if (book2 === null) {
+      console.log(book1)
+      const b1ID = getVersionIDfromURL(book1.release_version.url, true);
+      const baseURL = srtFolders[releaseCode];
+      pairwiseFullUrl = `${baseURL}/${b1ID}/`;
+    } else {
+      pairwiseFullUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, false);
+    }
     const urlRes = await urlExists(pairwiseFullUrl);
     if (urlRes) {
       console.log("Full text reuse data found at: " + pairwiseFullUrl);
-      const pairwiseLiteUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, true);
+      if (book2 === null) {
+        // If there is no book2, then we check a response on the tree, not the raw
+        const b1ID = getVersionIDfromURL(book1.release_version.url, true);
+        const baseURL = lightSrtFolders[releaseCode];
+        pairwiseLiteUrl = `${baseURL}/${b1ID}/`;
+      } else {
+        pairwiseLiteUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, true);
+      }
       return { pairwiseUrl: pairwiseFullUrl, pairwiseLiteUrl: pairwiseLiteUrl, githubUrl: false};
     }
   } else {
@@ -77,7 +92,14 @@ const checkPairwiseCsvResponse = async (releaseCode, book1, book2, full=false) =
     }
   }
   // If we have not returned yet, the response failed so we check GitHub (just lite URL)
-  const githubUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, false, true);
+  let githubUrl;
+  if (book2 === null) {
+    // If there is no book2, then we just return - as we cannot check the GitHub URL without a book2
+    return { pairwiseUrl: null, pairwiseLiteUrl: null, githubUrl: true };
+  } else {
+    githubUrl = await buildPairwiseCsvURL(releaseCode, book1, book2, false, true);
+  }
+  // Check the GitHub URL
   const githubRes = await urlExists(githubUrl);
   if (githubRes) {
     return { pairwiseUrl: null, pairwiseLiteUrl: githubUrl, githubUrl: true };
@@ -85,6 +107,7 @@ const checkPairwiseCsvResponse = async (releaseCode, book1, book2, full=false) =
     // If both responses fail, return null for both URLs}
     return { pairwiseUrl: null, pairwiseLiteUrl: pairwiseLiteUrl, githubUrl: false };
   }
+
 };
 
 
