@@ -51,7 +51,7 @@ const DownloadPanel = ( {isPairwiseViz, downloadFileName} ) => {
       > 
         <Typography sx={{ fontWeight: 'bold' }}>Download options:</Typography>
         <OutputDimensions/>
-        <IncludeMetaDropdown/>
+        {isPairwiseViz && <IncludeMetaDropdown/>}
         <Tooltip placement="top" title={"Include URL of this visualization in the downloaded image?"}>
           <Button onClick={handleIncludeUrlChange}>
             <Box display="flex" alignItems="center">
