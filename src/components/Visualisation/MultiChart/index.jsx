@@ -40,6 +40,49 @@ const MultiVisual = (props) => {
     //setColors
   } = useContext(Context);
 
+  // set the dimensions and margins of the graph
+  //var margin = { top: 20, right: 30, bottom: 20, left: 60 };
+
+  
+  /*
+  // adjust the margins based on the metadata in the graph
+  // (and the size of the label fonts)
+  useEffect(() => {
+    console.log("UPDATING MARGINS")
+    if (includeMetaInDownload) {
+      if (metaPositionInDownload === "left") {
+        setVisMargins((prev) => ({
+          ...prev, 
+          left: prev.left + axisLabelFontSize
+        }));
+      } else {
+        setVisMargins((prev) => ({
+          ...prev, 
+          top: prev.top + axisLabelFontSize
+        }));
+      }
+    }
+    if (includeURL) {
+      setVisMargins((prev) => ({
+        ...prev, 
+        top: prev.top + axisLabelFontSize
+      }));
+    }
+  }, [includeMetaInDownload, metaPositionInDownload, axisLabelFontSize, includeURL, setVisMargins]);
+  */
+  /*
+  if (includeMetaInDownload) {
+    if (metaPositionInDownload === "left") {
+      margin.left += axisLabelFontSize;
+    } else {
+      margin.top += axisLabelFontSize;
+    }
+  }
+  if (includeURL) {
+    margin.top += axisLabelFontSize;
+  }
+  console.log(margin);
+  */
   // TODO: let user set width/height (with resizable component or input field?)
   var width = 1000 - visMargins.left - visMargins.right;
   var height = 600 - visMargins.top - visMargins.bottom;
