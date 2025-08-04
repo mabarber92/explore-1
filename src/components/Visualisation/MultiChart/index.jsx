@@ -22,67 +22,8 @@ const MultiVisual = (props) => {
     colorScale,
     selfReuseOnly,
     visMargins,
-    //setChartData,
-    /*Books,
-    setBooks,
-    bookSectionRef,
-    focusMilestone1,
-    focusMilestone2,
-    setBooksAlignment,
-    isFlipped,
-    dataLoading,
-    setDataLoading,
-    setFocusedDataIndex,
-    setDisplayMs,
-    focusedDataIndex,
-    setFlipTimeLoading,*/
-    //colors,
-    //setColors
   } = useContext(Context);
 
-  // set the dimensions and margins of the graph
-  //var margin = { top: 20, right: 30, bottom: 20, left: 60 };
-
-  
-  /*
-  // adjust the margins based on the metadata in the graph
-  // (and the size of the label fonts)
-  useEffect(() => {
-    console.log("UPDATING MARGINS")
-    if (includeMetaInDownload) {
-      if (metaPositionInDownload === "left") {
-        setVisMargins((prev) => ({
-          ...prev, 
-          left: prev.left + axisLabelFontSize
-        }));
-      } else {
-        setVisMargins((prev) => ({
-          ...prev, 
-          top: prev.top + axisLabelFontSize
-        }));
-      }
-    }
-    if (includeURL) {
-      setVisMargins((prev) => ({
-        ...prev, 
-        top: prev.top + axisLabelFontSize
-      }));
-    }
-  }, [includeMetaInDownload, metaPositionInDownload, axisLabelFontSize, includeURL, setVisMargins]);
-  */
-  /*
-  if (includeMetaInDownload) {
-    if (metaPositionInDownload === "left") {
-      margin.left += axisLabelFontSize;
-    } else {
-      margin.top += axisLabelFontSize;
-    }
-  }
-  if (includeURL) {
-    margin.top += axisLabelFontSize;
-  }
-  console.log(margin);
-  */
   // TODO: let user set width/height (with resizable component or input field?)
   var width = 1000 - visMargins.left - visMargins.right;
   var height = 600 - visMargins.top - visMargins.bottom;
@@ -94,33 +35,16 @@ const MultiVisual = (props) => {
 
   const downloadFileName = `${book1?.versionCode}_all.png`;
 
-  /*const infernoReversed = [
-    "#fcffa4",
-    "#f7d13d",
-    "#fb9b06",
-    "#ed6925",
-    "#cf4446",
-    "#a52c60",
-    "#781c6d",
-    "#4a0c6b",
-    "#1b0c41",
-    "#000004"
-  ];*/
-
   // extract relevant objects from chartData:
   let {
     versionCode,
     tokens,
     msData,
     msStats,
-    //msBooks,
     bookStats,
-    //bookIndexDict,
     bookUriDict,
   } = chartData;
-  /*console.log("CHARTDATA:");
-  console.log(chartData);
-  console.log(bookStats);*/
+
   
   const [dateRange, setDateRange] = useState([0, 1500]);
   let maxbc = getHighestValueInArrayOfObjects(bookStats, "ch_match");
