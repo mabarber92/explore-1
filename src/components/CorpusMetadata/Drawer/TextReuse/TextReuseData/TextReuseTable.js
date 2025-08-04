@@ -3,10 +3,9 @@ import { Box, CircularProgress, IconButton, Tooltip, Typography } from "@mui/mat
 import TableHeader from "./TableHeader";
 import { getVersionMetadataById } from "../../../../../services/CorpusMetaData";
 import {  getOneBookReuseStats } from "../../../../../services/TextReuseData";
-import { buildPairwiseCsvURL } from "../../../../../utility/Helper";
+import { buildPairwiseCsvURL, checkPairwiseCsvResponse } from "../../../../../utility/Helper";
 import { Context } from "../../../../../App";
 import Papa from "papaparse";
-
 
 const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1MetadataLoading }) => { 
   const { isOpenDrawer, setIsOpenDrawer } = useContext(Context);
@@ -17,6 +16,35 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [total, setTotal] = useState(0);
+  const [useGithubUrl, setUseGithubUrl] = useState(false);
+  const [fullDataExists, setFullDataExists] = useState(false);
+  const [liteDataExists, setLiteDataExists] = useState(false);
+
+  // Check the server response to see if the full and lite data exists
+  useEffect(() => {
+    // Prevent from running at closing of the drawer
+    if (!isOpenDrawer) return;
+    // If we have book1 - check what kind of data can be fetched (is the server live or are we defaulting to GitHub?)
+    if (b1Metadata && b1Metadata.version_uri) {      
+      const releaseCode = JSON.parse(localStorage.getItem("release_code"));
+      const checkServerResponse = async (book1) => {
+        const csvObj = await checkPairwiseCsvResponse(releaseCode, book1);
+        if (csvObj.githubUrl) {
+          // If the GitHub URL is true, we are using GitHub as a fallback
+          setUseGithubUrl(true);
+          setLiteDataExists(true);
+        } else {
+          // If the GitHub URL is false, we are using the server
+          setFullDataExists(csvObj.pairwiseUrl !== null);
+          setLiteDataExists(csvObj.pairwiseLiteUrl !== null);
+        }
+        console.log(csvObj);
+      }
+      // Check the server response
+      checkServerResponse(b1Metadata);
+    }
+  }, [b1Metadata, isOpenDrawer]);
+      
 
   // fetch the stats data from GitHub:
   useEffect(() => {
@@ -132,22 +160,39 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
    * @param {Object} b1Metadata full metadata of book1
    * @param {Object} book2ID version ID of book2
    */
-  const downloadPairwiseCsv = async (b1Metadata, book2ID) => {
+  const downloadPairwiseCsv = async (b1Metadata, book2ID, light=false, github=false) => {
     // we already have full metadata of book1;
     // download the metadata for book 2 and get the ID:
     const releaseCode = JSON.parse(localStorage.getItem("release_code"));
     const b2Metadata = await getVersionMetadataById(releaseCode, book2ID);
     // build the URL to the CSV file:
-    const csvUrl = await buildPairwiseCsvURL(releaseCode, b1Metadata, b2Metadata);
+    const csvUrl = await buildPairwiseCsvURL(releaseCode, b1Metadata, b2Metadata, light, github);
     const csvFilename = csvUrl.split("/").pop();
-    // create a temporary link to the csv file to trigger the download:
-    const link = document.createElement('a');
-    link.href = csvUrl;
-    link.setAttribute('download', csvFilename); 
-    document.body.appendChild(link);
-    // download and clean up:
-    link.click();
-    document.body.removeChild(link);
+    if (github) {
+        // If the URL is a GitHub URL, then we need to download it differently
+        const response = await fetch(csvUrl);
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", csvFilename); // Set the file name for download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+       }
+    else {
+      // create a temporary link to the csv file to trigger the download:
+      const link = document.createElement('a');
+      link.href = csvUrl;
+      link.setAttribute('download', csvFilename); 
+      document.body.appendChild(link);
+      // download and clean up:
+      link.click();
+      document.body.removeChild(link);
+    }
   }
 
   /**
@@ -218,7 +263,7 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                   }}
                 >
                   <Typography
-                    width={"80%"}
+                    width={"70%"}
                     padding={"0px 15px"}
                     sx={{
                       wordWrap: "break-word",
@@ -242,11 +287,12 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                     {item?.alignments}
                   </Typography>
                   <Box
-                    width={"10%"}
+                    width={"20%"}
                     padding={"0px 15px"}
                     display={"flex"}
                     alignItems={"center"}
                   >
+                    { useGithubUrl || liteDataExists ? (
                     <Tooltip placement="top" title={"Visualization"}>
                       <Typography>
                         <button
@@ -268,8 +314,10 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                         </button>
                       </Typography>
                     </Tooltip>
-
-                    <Tooltip placement="top" title={"Download CSV"}>
+                    ) : null
+                    }
+                    { fullDataExists ? (
+                    <Tooltip placement="top" title={"Download CSV (with text of alignments)"}>
                       <Typography>
                         <IconButton
                           sx={{
@@ -281,11 +329,33 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
                           }}
                           onClick={() => downloadPairwiseCsv(b1Metadata, item.id)}
                         >
-                          <i className="fa-solid fa-file-csv"></i>
+                          <i className="fa-solid fa-file"></i>
                         </IconButton>
 
                       </Typography>
                     </Tooltip>
+                    ) : null
+                    }
+                    { useGithubUrl || liteDataExists ? (
+                    <Tooltip placement="top" title={"Download Lite CSV (excluding text of alignments)"}>
+                      <Typography>
+                        <IconButton
+                          sx={{
+                            background: "none",
+                            border: "0px",
+                            cursor: "pointer",
+                            fontSize: "18px",
+                            color: "#7593af",
+                          }}
+                          onClick={() => downloadPairwiseCsv(b1Metadata, item.id, true, useGithubUrl)}
+                        >
+                          <i className="fa-solid fa-file-half-dashed"></i>
+                        </IconButton>
+
+                      </Typography>
+                    </Tooltip>
+                    ) : null
+                  }
                   </Box>
                 </Box>
               )

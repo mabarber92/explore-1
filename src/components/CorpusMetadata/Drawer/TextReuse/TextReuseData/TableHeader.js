@@ -22,7 +22,7 @@ const TableHeader = ({ sortingOrder, setSortingOrder }) => {
       <Box
         display={"flex"}
         alignItems={"center"}
-        width={"80%"}
+        width={"70%"}
         padding={"0px 15px"}
       >
         Work
@@ -49,7 +49,7 @@ const TableHeader = ({ sortingOrder, setSortingOrder }) => {
           setSortingOrder={setSortingOrder}
         />
       </Box>
-      <Typography width={"10%"} padding={"0px 15px"}></Typography>
+      <Typography width={"20%"} padding={"0px 15px"}></Typography>
     </Box>
   );
 };
