@@ -7,9 +7,9 @@ import { Context } from "../../../App";
 
 const BottomBar = (props) => {
   const ref = useRef();
-  const { tickFontSize } = useContext(Context);
+  const { tickFontSize, axisLabelFontSize } = useContext(Context);
   let height = props.height - props.margin.top - props.margin.bottom;
-  let width = props.width + 2*tickFontSize;
+  let width = props.width;
 
   // initialize the svg on mount:
   useEffect(() => {
@@ -70,8 +70,8 @@ const BottomBar = (props) => {
       .attr("text-anchor", "end")
       .attr("x", width)
       //.attr("y", height + 25)
-      .attr("y", height + 20 + tickFontSize)
-      .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+      .attr("y", height + 20 + axisLabelFontSize)
+      .style("font-size", `${axisLabelFontSize}px`)
       .text(xLabelText);
 
     // Add Y axis:
@@ -88,10 +88,10 @@ const BottomBar = (props) => {
     barSvg.append("text")
       .attr("class", "yLabel")
       .attr("text-anchor", "end")
-      .attr("y", tickFontSize)  // replace with axisLabelFontSize
+      .attr("y", axisLabelFontSize) 
       .attr("dy", "-4em")
       .attr("transform", "rotate(-90)")
-      .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+      .style("font-size", `${axisLabelFontSize}px`) 
       .text("Characters reused"); 
       
     // update the tick font size

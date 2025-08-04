@@ -13,6 +13,8 @@ const OutputDimensions = () => {
   const { 
     tickFontSize, 
     setTickFontSize,
+    axisLabelFontSize,
+    setAxisLabelFontSize,
     outputImageWidth,
     setOutputImageWidth,
     dpi, 
@@ -57,13 +59,31 @@ const OutputDimensions = () => {
           />
         </FormControl>
       </Tooltip>
-      <Tooltip placement="top" title="Change the size of the X and Y axis tick labels">
+      <Tooltip placement="top" title="Change the size of the numeric tick labels on the X and Y axes">
         <FormControl size="small">
           <TextField
-            label="Axis labels size (px)"
+            label="Tick label size (px)"
             type="text"
             value={tickFontSize}
             onChange={(e) => setTickFontSize(e.target.value)}
+            sx={{ 
+                width: 120,
+                ml: 1,
+                "& .MuiInputBase-input": {
+                  padding: "6px 8px",
+                  fontSize: "0.85rem",
+                },
+            }}
+          />
+        </FormControl>
+      </Tooltip>
+      <Tooltip placement="top" title="Change the size of the graph's labels">
+        <FormControl size="small">
+          <TextField
+            label="Axis label size (px)"
+            type="text"
+            value={axisLabelFontSize}
+            onChange={(e) => setAxisLabelFontSize(e.target.value)}
             sx={{ 
                 width: 120,
                 ml: 1,

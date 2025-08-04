@@ -28,13 +28,15 @@ const ScatterPlot = (props) => {
     colorScale,
     setColorScale,
     tickFontSize,
+    axisLabelFontSize,
     showDownloadOptions,
     includeURL,
-    url
+    url,
+    visMargins
     //axisLabelFontSize
   } = useContext(Context);
 
-  const width = props.width + 2*tickFontSize;
+  const width = props.width;
 
 
   // create the color scale, based on the ch_match values:
@@ -65,7 +67,8 @@ const ScatterPlot = (props) => {
   
   // initialize the svg on mount:
   useEffect(() => {
-    let t = `translate(${props.margin.left}, ${props.margin.top})`;
+    //let t = `translate(${props.margin.left}, ${props.margin.top})`;
+    let t = `translate(${visMargins.left}, ${visMargins.top})`;
     d3.select(ref.current)
       .html("")
       .append("g")
@@ -76,7 +79,8 @@ const ScatterPlot = (props) => {
       .attr("width", "100%")
       .attr("height", "100%")
       .attr("fill", "lightgrey");*/
-  },[props.margin.left, props.margin.top]);
+  }, [visMargins]);
+  //},[props.margin.left, props.margin.top]);
 
   // create the axes etc. for every change of relevant variables:
   useEffect(() => {
@@ -265,19 +269,19 @@ const ScatterPlot = (props) => {
       .append("text")
         .attr("class", "yLabel")
         .attr("text-anchor", "end")
-        .attr("y", tickFontSize)  // replace with axisLabelFontSize
-        .attr("dy", "-4em")
+        .attr("y", axisLabelFontSize)
+        .attr("dy", "-3em")
         .attr("transform", "rotate(-90)")
-        .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+        .style("font-size", `${axisLabelFontSize}px`)
         .text("Milestones in "+props.mainBookURI);
 
     if (showDownloadOptions){
       if (includeURL) {
         scatterPlot.append("text")
           .attr("x", props.left)             
-          .attr("y", -tickFontSize)  // replace with axisLabelFontSize
+          .attr("y", -axisLabelFontSize) 
           .attr("text-anchor", "left")  
-          .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+          .style("font-size", `${axisLabelFontSize}px`)
           .style("text-decoration", "underline")  
           .text(window.location.origin + url);
       }
@@ -361,8 +365,8 @@ const ScatterPlot = (props) => {
       <svg 
         id={"scatterChart"}
         ref={ref}
-        width={width + props.margin.left + props.margin.right}
-        height={props.height + props.margin.top + props.margin.bottom}
+        width={width + visMargins.left + visMargins.right}
+        height={props.height + visMargins.top + visMargins.bottom}
       />
       <div ref={bottomOfGraph}/>
     </Box>

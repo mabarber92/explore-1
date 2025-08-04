@@ -161,12 +161,11 @@ const VisualisationPage = () => {
   useEffect(() => {
     const updateMargins = () => {
       const margins = { ...defaultMargins };
-      const charHeight = Math.max(axisLabelFontSize, tickFontSize);
+      const charHeight = axisLabelFontSize;
       const lineHeight = 1.3 * charHeight;
       if (includeURL) {
         console.log("Making space for URL");
         margins.top += lineHeight;
-        //margins.top += tickFontSize;
         console.log(margins);
       } else {
         console.log("No space for URL");
@@ -178,17 +177,22 @@ const VisualisationPage = () => {
           // in order to put the metadata along the Y axis,
           // we may need to break it into lines. 
           // Calculate into how many lines we will have to break 
-          // the longest of the labels:
-          const b1Label = getMetaLabel(metaData.book1, includeMetaInDownload);
-          const b2Label = getMetaLabel(metaData.book2, includeMetaInDownload);
-          const longestLabel = [b1Label, b2Label].sort((a, b) =>{
-            return b.length - a.length
-          })[0];
+          // (the longest of) the labels:
           const avgCharWidth = charHeight * 0.55;
-          const maxChars = Math.floor(200/avgCharWidth);
-          const nLines = wrapText(longestLabel, maxChars).length;
-          // add margin space for the required number of lines:
-          margins.left += nLines * lineHeight;
+          if (isPairwiseViz){
+            const b1Label = getMetaLabel(metaData.book1, includeMetaInDownload);
+            const b2Label = getMetaLabel(metaData.book2, includeMetaInDownload);
+            const longestLabel = [b1Label, b2Label].sort((a, b) =>{
+              return b.length - a.length
+            })[0];
+            const maxChars = Math.floor(200/avgCharWidth);
+            const nLines = wrapText(longestLabel, maxChars).length;
+            // add margin space for the required number of lines:
+            margins.left += nLines * lineHeight;
+          } else {
+            margins.left += lineHeight;
+          }
+          
         } else {
           margins.top += lineHeight;
         }
@@ -205,7 +209,8 @@ const VisualisationPage = () => {
     metaPositionInDownload,
     axisLabelFontSize,
     tickFontSize,
-    metaData
+    metaData, 
+    isPairwiseViz
   ]);
 
   const handleUpload = async (upload) => {

@@ -8,7 +8,7 @@ import { Context } from "../../../App";
 
 const SideBar = (props) => {
   const ref = useRef();
-  const { tickFontSize } = useContext(Context); // add axisLabelFontSize
+  const { tickFontSize, axisLabelFontSize } = useContext(Context); // add axisLabelFontSize
 
   // initialize the svg on mount:
   useEffect(() => {
@@ -54,10 +54,10 @@ const SideBar = (props) => {
     barSvg.append("text")
       .attr("class", "xLabel")
       .attr("text-anchor", "middle")
-      .attr("x", 170-tickFontSize)  // replace with axisLabelFontSize
+      .attr("x", 170-axisLabelFontSize)  // FIXME
       .attr("dx", "-4em")
       /*.attr("y", height + 25)*/
-      .style("font-size", `${tickFontSize}px`) // replace with axisLabelFontSize
+      .style("font-size", `${axisLabelFontSize}px`)
       .text("Characters reused");
 
     // Add Y axis:
@@ -130,7 +130,7 @@ const SideBar = (props) => {
       )    
     
   }, [props.msStats, props.height, props.mainBookMilestones, props.width, 
-      tickFontSize]); // axisLabelFontSize
+      tickFontSize, axisLabelFontSize]);
   
   return (
     <svg 

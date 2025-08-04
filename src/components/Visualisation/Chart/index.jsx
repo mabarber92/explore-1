@@ -245,15 +245,21 @@ const Visual = (props) => {
       { x: barMaxHeight, y: barMaxHeight * 2, yScale: y0Scale, visible: false },
     ];
 
+    // update the tick font size: 
+    d3.selectAll("#chartBox .axis .tick text")
+      .style("font-size", `${tickFontSize}px`);
+
+    // update the margins of the graph:
+
     if (showDownloadOptions){
-      const charHeight = Math.max(tickFontSize, axisLabelFontSize);
+      const charHeight = axisLabelFontSize;
       const lineHeight = charHeight * 1.3;
       if (includeURL) {
         svgD3.append("text")
           .attr("x", visMargins.left)             
-          .attr("y", lineHeight)  // replace with axisLabelFontSize
+          .attr("y", lineHeight)
           .attr("text-anchor", "left")  
-          .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+          .style("font-size", `${axisLabelFontSize}px`)
           .style("text-decoration", "underline")  
           .text(window.location.origin + url);
       } 
@@ -285,7 +291,7 @@ const Visual = (props) => {
               .attr("x", -150 - visMargins.top)  // 150 being the size of the Y axis
               .attr("y", space)  
               .attr("text-anchor", "start")  
-              .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+              .style("font-size", `${axisLabelFontSize}px`)
               .text(textContent);
             space += lineHeight;
           })
@@ -298,7 +304,7 @@ const Visual = (props) => {
               .attr("x", -450 - visMargins.top) 
               .attr("y", space)  
               .attr("text-anchor", "start")  
-              .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+              .style("font-size", `${axisLabelFontSize}px`)
               .text(textContent);
             space += lineHeight;
           })
@@ -308,17 +314,17 @@ const Visual = (props) => {
           // Add b1 metadata at the top:
           svgD3.append("text")
             .attr("x", visMargins.left)             
-            .attr("y", includeURL ? 3*lineHeight : 2*lineHeight)  // replace with axisLabelFontSize
+            .attr("y", includeURL ? 3*lineHeight : 2*lineHeight)
             .attr("text-anchor", "left")  
-            .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+            .style("font-size", `${axisLabelFontSize}px`)
             .text(textContentb1);
 
             // add b2 metadata at the bottom:
           svgD3.append("text")
             .attr("x", visMargins.left)             
-            .attr("y", outerHeight - lineHeight)  // replace with axisLabelFontSize
+            .attr("y", outerHeight - lineHeight) 
             .attr("text-anchor", "left")  
-            .style("font-size", `${tickFontSize}px`)  // replace with axisLabelFontSize
+            .style("font-size", `${axisLabelFontSize}px`)
             .text(textContentb2);
         }      
       }
@@ -470,7 +476,8 @@ const Visual = (props) => {
       .attr("x", -5)
       .attr("y", -5)
       .attr("transform", "rotate(-90)")
-      .style("text-anchor", "end");
+      .style("text-anchor", "end")
+      .style("font-size", `${tickFontSize}px`);
 
     // - render X Axis of Book2 ::
     x1Axis.tickValues(
@@ -483,7 +490,8 @@ const Visual = (props) => {
       .attr("x", 5)
       .attr("y", 2)
       .attr("transform", "rotate(-90)")
-      .style("text-anchor", "start");
+      .style("text-anchor", "start")
+      .style("font-size", `${tickFontSize}px`);
 
     // - render Reference Lines Min and Max ::
     marksG

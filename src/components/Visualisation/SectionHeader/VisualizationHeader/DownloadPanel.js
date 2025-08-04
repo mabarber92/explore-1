@@ -21,16 +21,12 @@ const DownloadPanel = ( {isPairwiseViz, downloadFileName} ) => {
   }
 
   // Apply font size when it changes
-    useEffect(() => {
-      // TODO: fix the font size for one-to-many chart!
-      console.log("Updating font size");
-      d3.selectAll(`#chartBox .tick text`).style("font-size", `${tickFontSize}px`);
-      /*const selectors = [`#chartBox`, ".bottom-bar", ".side-bar"];
-      selectors.map((item) => {
-        console.log(item); 
-        d3.selectAll(`${item} .tick text`).style("font-size", `${tickFontSize}px`);
-      })*/
-    }, [tickFontSize]);
+  // NB: For the pairwise viz, this is overridden by the redrawing of the chart;
+  //     so it has to be changed there as well.
+  useEffect(() => {
+    const tickTexts = d3.selectAll("#chartBox .tick text");
+    tickTexts.style("font-size", `${tickFontSize}px`);
+  }, [tickFontSize]);
 
 
   return (
