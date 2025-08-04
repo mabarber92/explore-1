@@ -389,6 +389,7 @@ export const setMultiVizData = (values) => {
                   msStats: msStats,
                   msBooks: msBooks,
                   bookStats: stats,
+                  maxTotalChMatch: getHighestValueInArrayOfObjects(stats, "ch_match"),
                   bookIndexDict: bookIndexDict,
                   bookUriDict: bookUriDict,
                   /*filteredMsData: msData,
