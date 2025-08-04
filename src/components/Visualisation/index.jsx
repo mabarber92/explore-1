@@ -158,21 +158,77 @@ const VisualisationPage = () => {
   const navigate = useNavigate();
   const { version } = useParams();
 
+  // update the margins of the graphs, based on 
+  // * label font size
+  // * tick font size
+  // * presence of metadata
+  // * presence of url
   useEffect(() => {
     const updateMargins = () => {
-      const margins = { ...defaultMargins };
+      // use the size of the axis and/or tick labels as default margins:
+      const minMargin = Math.max(axisLabelFontSize, tickFontSize);
+      const margins = { top: minMargin, bottom: minMargin, left: minMargin, right: minMargin};
+
+      // calculate the height of a label line, based on the label font size:
       const charHeight = axisLabelFontSize;
       const lineHeight = 1.3 * charHeight;
+
+      // make space for the URL at the top of the graph, if user wants to include it:
       if (includeURL) {
         console.log("Making space for URL");
-        margins.top += lineHeight;
+        margins.top += 2*lineHeight;
         console.log(margins);
       } else {
         console.log("No space for URL");
         console.log(margins);
       }
-      // update the margins of the graph:
-      if (includeMetaInDownload !== "no") {
+
+      // adjust the left margin to the size of the largest tick label: 
+      const tickCharWidth = tickFontSize * 0.65;
+      if (isPairwiseViz) {
+        // in pairwise viz, the largest tick label is 300 => consists of 3 digits
+        margins.left += 3 * tickCharWidth;
+      } else {
+        // in one-to-many viz, there are two sets of tick labels: 
+        // milestone numbers (top) and total number of reused characters (bottom)
+        try {
+          // milestone numbers: 
+          const lastMs = Math.ceil(chartData?.tokens?.first / 300)
+          const nMsDigits = lastMs.toString().length;
+          console.log("Milestone digits: "+nMsDigits);
+          // calculate how many digits the bottom graph's tick labels will have:
+          const highestBookReuse = chartData?.maxTotalChMatch;
+          const nReuseDigits = highestBookReuse.toString().length;
+          console.log("Reuse digits: "+nReuseDigits);
+          // calculate how many digits the formatted version (4K for 4000 etc.) will have:
+          const nReuseDigitsFormatted = nReuseDigits > 3 ? ((nReuseDigits-1) % 3) + 2: nReuseDigits;
+          console.log("Reuse digits, formatted: "+nReuseDigitsFormatted);
+          console.log(((nReuseDigits-1) % 3) + 2);
+          margins.left += Math.max(nMsDigits, nReuseDigitsFormatted) * tickCharWidth;
+        } catch(err) {
+          console.log(err);
+          console.log("setting default margin")
+          margins.left += 5 * tickCharWidth;
+        }
+      }
+      // add space for some padding between the tick labels and the bar:
+      const tickPadding = 2*tickCharWidth;
+      margins.left += tickPadding;
+
+      // adjust the left margin in a one-to-many visualization
+      // if the bottom bar's label needs to be split:
+      if (!isPairwiseViz) {
+        const avgCharWidth = axisLabelFontSize * 0.55;
+        const maxChars = Math.floor(120/avgCharWidth);
+        const nLines = wrapText("Characters reused", maxChars).length;
+        margins.top += nLines*lineHeight;
+      }
+
+      // adjust the bottom margin to the tick font size:
+      margins.bottom += 1*tickFontSize;
+
+      // update the margins of the graph in case user wants to include metadata:
+      if (isPairwiseViz && includeMetaInDownload !== "no") {
         if (metaPositionInDownload === "left") {
           // in order to put the metadata along the Y axis,
           // we may need to break it into lines. 
@@ -192,7 +248,6 @@ const VisualisationPage = () => {
           } else {
             margins.left += lineHeight;
           }
-          
         } else {
           margins.top += lineHeight;
         }
@@ -202,6 +257,7 @@ const VisualisationPage = () => {
     };
     updateMargins();
   }, [
+    chartData,
     setVisMargins, 
     defaultMargins, 
     includeURL, 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 import "../../../index.css";
-import { bisectLeft, calculateTooltipPos } from "../../../utility/Helper";
+import { bisectLeft, calculateTooltipPos, wrapTextToSpace } from "../../../utility/Helper";
 import { Context } from "../../../App";
 
 
@@ -10,6 +10,8 @@ const BottomBar = (props) => {
   const { tickFontSize, axisLabelFontSize } = useContext(Context);
   let height = props.height - props.margin.top - props.margin.bottom;
   let width = props.width;
+  console.log("BOOK STATS PASSED TO BOTTOMBAR:");
+  console.log(props.bookStats);
 
   // initialize the svg on mount:
   useEffect(() => {
@@ -33,6 +35,8 @@ const BottomBar = (props) => {
       .range([ 0, width ]);
     // build Y axis scale:
     let maxTotalChMatch = d3.max(props.bookStats, d => d.ch_match);
+    console.log(props.maxTotalChMatch);
+    //let maxTotalChMatch = props.maxTotalChMatch;
     let yScale = d3.scaleLinear()
       .domain([maxTotalChMatch, 0])
       .range([0, height]);
@@ -69,8 +73,8 @@ const BottomBar = (props) => {
       .attr("class", "xLabel")
       .attr("text-anchor", "end")
       .attr("x", width)
-      //.attr("y", height + 25)
-      .attr("y", height + 20 + axisLabelFontSize)
+      //.attr("y", height + 20 + axisLabelFontSize)
+      .attr("y", height + props.margin.top + props.margin.bottom)
       .style("font-size", `${axisLabelFontSize}px`)
       .text(xLabelText);
 
@@ -79,20 +83,41 @@ const BottomBar = (props) => {
     barSvg.append("g")
       .attr("class", "yAxis")
       .call(d3.axisLeft(yScale)
-        .tickFormat(d3.format('.2s'))
-        .ticks(4)
+        .tickFormat(d3.format('.0s'))
+        .ticks(3)
         .tickSize(2)
       );
     // Add Y axis label:
     barSvg.selectAll(".yLabel").remove();
-    barSvg.append("text")
+    
+    // set the Y axis label (wrapping it if necessary):
+    const lineHeight = axisLabelFontSize * 1.3;
+    /*const avgCharWidth = axisLabelFontSize * 0.55;
+    const maxChars = Math.floor(100/avgCharWidth);
+    console.log(maxChars);
+    const labelLines = wrapText("Characters reused", maxChars);*/
+    const labelLines = wrapTextToSpace("Characters reused", 100, axisLabelFontSize);
+    console.log(labelLines);
+    let ySpace = -props.margin.left + 2* axisLabelFontSize;
+    labelLines.reverse().forEach((line) => {
+      barSvg.append("text")
+        .attr("class", "yLabel")
+        .attr("text-anchor", "end")
+        .attr("y", ySpace)
+        .attr("transform", "rotate(-90)")
+        .style("font-size", `${axisLabelFontSize}px`) 
+        .text(line);
+      ySpace -= lineHeight;
+    });
+
+    /*barSvg.append("text")
       .attr("class", "yLabel")
       .attr("text-anchor", "end")
-      .attr("y", axisLabelFontSize) 
-      .attr("dy", "-4em")
+      .attr("y", -props.margin.left + 2* axisLabelFontSize) 
+      //.attr("dy", "-4em")
       .attr("transform", "rotate(-90)")
       .style("font-size", `${axisLabelFontSize}px`) 
-      .text("Characters reused"); 
+      .text("Characters reused"); */
       
     // update the tick font size
     barSvg

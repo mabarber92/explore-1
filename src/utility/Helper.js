@@ -486,9 +486,15 @@ function wrapText(text, maxChars) {
     if (char === " " || char === "-") {
       // If adding this word would exceed the limit
       if ((currentLine + " " + currentWord).trim().length > maxChars) {
-        lines.push(currentLine.trim());
-        // Push the current line and start a new one
-        currentLine = currentWord;
+        if (currentLine.trim() !== "") {
+          lines.push(currentLine.trim());
+          // Push the current line and start a new one
+          currentLine = currentWord;
+        } else {
+          lines.push(currentWord);
+        }
+         
+        
       } else {
         // Otherwise, add the word to the current line
         currentLine += currentWord;
@@ -506,6 +512,16 @@ function wrapText(text, maxChars) {
   }
 
   return lines;
+}
+
+/*
+ * wrap a string into lines based on the available space 
+ * and the font size
+*/
+function wrapTextToSpace(text, availableSpace, fontSize) {
+  const avgCharWidth = fontSize * 0.55;
+  const maxChars = Math.floor(availableSpace/avgCharWidth);
+  return wrapText(text, maxChars);
 }
 
 /*
@@ -549,6 +565,7 @@ export {
   getVersionIDfromURL,
   buildPairwiseCsvURL,
   wrapText,
+  wrapTextToSpace,
   loadChartFromUrl,
   getMetaLabel,
   checkPairwiseCsvResponse,

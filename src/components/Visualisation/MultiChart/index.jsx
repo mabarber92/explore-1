@@ -43,7 +43,10 @@ const MultiVisual = (props) => {
     msStats,
     bookStats,
     bookUriDict,
+    maxTotalChMatch
   } = chartData;
+
+  console.log(chartData);
 
   
   const [dateRange, setDateRange] = useState([0, 1500]);
@@ -204,6 +207,7 @@ const MultiVisual = (props) => {
                 mainBookURI={mainBookURI}
                 versionCode={versionCode}
                 bookStats={bookStats}
+                maxTotalChMatch={maxTotalChMatch}
                 msdata={msData}
                 maxChMatch={maxChMatch}
                 minChMatch={minChMatch}
@@ -235,7 +239,7 @@ const MultiVisual = (props) => {
           <BottomBar
             margin={{ ...visMargins, top: 0 }}
             width={width}
-            height={100}
+            height={120}
             bookStats={bookStats}
             mainBookURI={mainBookURI}
             dateRange={dataDateRange}

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 import "../../../index.css";
-import { calculateTooltipPos } from "../../../utility/Helper";
+import { calculateTooltipPos, wrapTextToSpace } from "../../../utility/Helper";
 import { Context } from "../../../App";
-
 
 
 const SideBar = (props) => {
@@ -12,7 +11,7 @@ const SideBar = (props) => {
 
   // initialize the svg on mount:
   useEffect(() => {
-    const t = `translate(0, ${props.margin.top})`;
+    const t = `translate(${tickFontSize}, ${props.margin.top})`;
     d3.select(ref.current)
       .html("")
       .append("g")
@@ -44,21 +43,35 @@ const SideBar = (props) => {
       .attr("class", "xAxis")
       .attr("transform", "translate(0," + props.height + ")")
       .call(d3.axisBottom(xScale)
-        .tickFormat(d3.format('.2s'))
-        .ticks(4)
+        .tickFormat(d3.format('.0s'))
+        .ticks(2)
         .tickSize(2)
         .tickPadding(5)
       );
     // Add X axis label:  see https://stackoverflow.com/a/11194968/4045481
     barSvg.selectAll(".xLabel").remove();
-    barSvg.append("text")
+    const lineHeight = axisLabelFontSize * 1.3;
+    const labelLines = wrapTextToSpace("Characters reused", 100, axisLabelFontSize);
+    console.log(labelLines);
+    //let ySpace = -props.margin.top + 2* axisLabelFontSize;
+    let ySpace = -axisLabelFontSize;
+    labelLines.reverse().forEach((line) => {
+      barSvg.append("text")
+        .attr("class", "xLabel")
+        .attr("text-anchor", "left")
+        .attr("y", ySpace)
+        .style("font-size", `${axisLabelFontSize}px`) 
+        .text(line);
+      ySpace -= lineHeight;
+    });
+    /*barSvg.append("text")
       .attr("class", "xLabel")
       .attr("text-anchor", "middle")
       .attr("x", 170-axisLabelFontSize)  // FIXME
       .attr("dx", "-4em")
-      /*.attr("y", height + 25)*/
+      //.attr("y", height + 25)
       .style("font-size", `${axisLabelFontSize}px`)
-      .text("Characters reused");
+      .text("Characters reused");*/
 
     // Add Y axis:
     barSvg.selectAll(".yAxis").remove();
@@ -130,7 +143,7 @@ const SideBar = (props) => {
       )    
     
   }, [props.msStats, props.height, props.mainBookMilestones, props.width, 
-      tickFontSize, axisLabelFontSize]);
+      tickFontSize, axisLabelFontSize, props.margin.top]);
   
   return (
     <svg 

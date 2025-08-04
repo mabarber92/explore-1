@@ -237,6 +237,7 @@ const ScatterPlot = (props) => {
           .tickSize(0)
         );
 
+    
     /*// Add X axis label:  see https://stackoverflow.com/a/11194968/4045481
     let xLabelText = "Books for which passim detected text reuse with "+props.mainBookURI+" (chronologically arranged)";
     scatterPlot.append("text")
@@ -269,8 +270,8 @@ const ScatterPlot = (props) => {
       .append("text")
         .attr("class", "yLabel")
         .attr("text-anchor", "end")
-        .attr("y", axisLabelFontSize)
-        .attr("dy", "-3em")
+        .attr("y", -visMargins.left + 2*axisLabelFontSize)
+        //.attr("dy", "-3em")
         .attr("transform", "rotate(-90)")
         .style("font-size", `${axisLabelFontSize}px`)
         .text("Milestones in "+props.mainBookURI);

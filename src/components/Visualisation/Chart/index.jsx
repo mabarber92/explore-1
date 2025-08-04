@@ -189,6 +189,7 @@ const Visual = (props) => {
   function setLayout() {
     outerWidth = chartBox.offsetWidth;
     innerWidth = outerWidth - visMargins.left - visMargins.right;
+    //const minMargin = Math.max(axisLabelFontSize, tickFontSize);
     outerHeight = startOuterHeight + visMargins.top + visMargins.bottom - defaultMargins.top - defaultMargins.bottom;
     //outerHeight = startOuterHeight
     innerHeight = outerHeight - visMargins.top - visMargins.bottom;
@@ -314,7 +315,7 @@ const Visual = (props) => {
           // Add b1 metadata at the top:
           svgD3.append("text")
             .attr("x", visMargins.left)             
-            .attr("y", includeURL ? 3*lineHeight : 2*lineHeight)
+            .attr("y", includeURL ? 2.5*lineHeight : lineHeight)
             .attr("text-anchor", "left")  
             .style("font-size", `${axisLabelFontSize}px`)
             .text(textContentb1);
@@ -322,7 +323,8 @@ const Visual = (props) => {
             // add b2 metadata at the bottom:
           svgD3.append("text")
             .attr("x", visMargins.left)             
-            .attr("y", outerHeight - lineHeight) 
+            .attr("y", outerHeight)
+            .attr("dy", "-1em")
             .attr("text-anchor", "left")  
             .style("font-size", `${axisLabelFontSize}px`)
             .text(textContentb2);
