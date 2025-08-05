@@ -1,7 +1,7 @@
 import { useEffect, useRef, useContext } from "react";
 import * as d3 from "d3";
 import "../../../index.css";
-import { calculateTooltipPos, wrapTextToSpace } from "../../../utility/Helper";
+import { calculateTooltipPos, wrapTextToSvgWidth } from "../../../utility/Helper";
 import { Context } from "../../../App";
 
 
@@ -51,7 +51,7 @@ const SideBar = (props) => {
     // Add X axis label:  see https://stackoverflow.com/a/11194968/4045481
     barSvg.selectAll(".xLabel").remove();
     const lineHeight = axisLabelFontSize * 1.3;
-    const labelLines = wrapTextToSpace("Characters reused", 100, axisLabelFontSize);
+    const labelLines = wrapTextToSvgWidth("Characters reused", 120, axisLabelFontSize);
     console.log(labelLines);
     //let ySpace = -props.margin.top + 2* axisLabelFontSize;
     let ySpace = -axisLabelFontSize;

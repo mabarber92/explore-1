@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import { Context } from "../../../App";
 import { extractAlignment } from "../../../functions/alignmentFunctions";
 import { getMilestoneText } from "../../../functions/getMilestoneText";
-import { calculateTooltipPos } from "../../../utility/Helper";
+import { calculateTooltipPos, wrapTextToSvgWidth } from "../../../utility/Helper";
 
 
 const ScatterPlot = (props) => {
@@ -32,7 +32,8 @@ const ScatterPlot = (props) => {
     showDownloadOptions,
     includeURL,
     url,
-    visMargins
+    visMargins,
+    yTickWidth
     //axisLabelFontSize
   } = useContext(Context);
 
@@ -266,21 +267,51 @@ const ScatterPlot = (props) => {
     //d3.select(ref.current)
     scatterPlot
       .selectAll(".yLabel").remove()
-    scatterPlot
-      .append("text")
+    
+    const lineHeight = 1.3*axisLabelFontSize;
+    const bookLabel = "Milestones in "+props.mainBookURI;
+    const labelLines = wrapTextToSvgWidth(
+      bookLabel, 
+      props.height-visMargins.top, 
+      axisLabelFontSize
+    );
+    /*let space = lineHeight;
+    labelLines.reverse().forEach((line) => {
+      const x = space;
+      const y = 0; 
+      d3.select("#scatterChart").append("text")
         .attr("class", "yLabel")
-        .attr("text-anchor", "end")
-        .attr("y", -visMargins.left + 2*axisLabelFontSize)
-        //.attr("dy", "-3em")
-        .attr("transform", "rotate(-90)")
-        .style("font-size", `${axisLabelFontSize}px`)
-        .text("Milestones in "+props.mainBookURI);
+        .attr("x", x)             
+        .attr("y", y)
+        .attr("text-anchor", "end")  // text will end at x,y
+        .attr("transform", `rotate(-90, ${x}, ${y})`)
+        .style("font-size", `${axisLabelFontSize}px`) 
+        .text(line);
+    });*/
+
+    
+    let space = -yTickWidth;
+    labelLines.reverse().forEach((line) => {
+      // define the point where the text ends ("text-anchor", "end"): 
+      const x = space;
+      const y = 0;  // center the rotation at the top of the Y axis
+      scatterPlot.append("text")
+        .attr("class", "yLabel")
+        .attr("text-anchor", "end") // text will end at x,y
+        .attr("x", x) 
+        .attr("y", y) 
+        // rotate the text around its end point:
+        .attr("transform", `rotate(-90, ${x}, ${y})`)
+        .style("font-size", `${axisLabelFontSize}px`) 
+        .text(line);
+      space -= lineHeight;  // move the 
+    });
 
     if (showDownloadOptions){
       if (includeURL) {
-        scatterPlot.append("text")
-          .attr("x", props.left)             
-          .attr("y", -axisLabelFontSize) 
+        d3.select("#scatterChart").append("text")
+          .attr("x", visMargins.left)             
+          .attr("y", axisLabelFontSize)
           .attr("text-anchor", "left")  
           .style("font-size", `${axisLabelFontSize}px`)
           .style("text-decoration", "underline")  
@@ -367,7 +398,7 @@ const ScatterPlot = (props) => {
         id={"scatterChart"}
         ref={ref}
         width={width + visMargins.left + visMargins.right}
-        height={props.height + visMargins.top + visMargins.bottom}
+        height={props.height + visMargins.top + tickFontSize}
       />
       <div ref={bottomOfGraph}/>
     </Box>
