@@ -586,6 +586,7 @@ export {
   getVersionIDfromURI,
   getVersionIDfromURL,
   buildPairwiseCsvURL,
+  measureSvgText,
   wrapTextToSvgWidth,
   loadChartFromUrl,
   getMetaLabel,
