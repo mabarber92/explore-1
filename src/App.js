@@ -181,6 +181,7 @@ function App() {
   const [includeURL, setIncludeURL] = useState(false);
   const [defaultMargins, setDefaultMargins] = useState({ top: 40, right: 20, bottom: 20, left: 60 });
   const [visMargins, setVisMargins] = useState({ top: 40, right: 20, bottom: 20, left: 60 });
+  const [yTickWidth, setYTickWidth] = useState(0);
   const [textAvailable, setTextAvailable] = useState(true);
   const [highlightMode, setHighlightMode] = useState("diff");
   const [nSharedChars, setNSharedChars] = useState(50);
@@ -392,6 +393,8 @@ function App() {
         setUrl,
         visMargins, 
         setVisMargins,
+        yTickWidth, 
+        setYTickWidth,
         defaultMargins,
         setDefaultMargins,
         highlightMode,
