@@ -35,7 +35,6 @@ const BottomBar = (props) => {
       .range([ 0, width ]);
     // build Y axis scale:
     let maxTotalChMatch = d3.max(props.bookStats, d => d.ch_match);
-    console.log(props.maxTotalChMatch);
     //let maxTotalChMatch = props.maxTotalChMatch;
     let yScale = d3.scaleLinear()
       .domain([maxTotalChMatch, 0])
@@ -55,8 +54,6 @@ const BottomBar = (props) => {
         }
         prev = i;
     }
-    console.log(tickIndices);
-    console.log(tickLabelDict);
     barSvg.selectAll(".xAxis").remove();
     barSvg.append("g")
       .attr("class", "xAxis")
@@ -77,7 +74,6 @@ const BottomBar = (props) => {
       axisLabelFontSize
     );
     let space = height + props.margin.top + props.margin.bottom;
-    console.log("SPACE "+space);
     xLabelLines.forEach((line) => {
       // define the point where the text ends ("text-anchor", "end"): 
       const x = width;
@@ -117,13 +113,7 @@ const BottomBar = (props) => {
     barSvg.selectAll(".yLabel").remove();
     
     // set the Y axis label (wrapping it if necessary):
-    /*const avgCharWidth = axisLabelFontSize * 0.55;
-    const maxChars = Math.floor(100/avgCharWidth);
-    console.log(maxChars);
-    const labelLines = wrapText("Characters reused", maxChars);*/
     const labelLines = wrapTextToSvgWidth("Characters reused", 100, axisLabelFontSize);
-    console.log(labelLines);
-    //let ySpace = -props.margin.left + 2* axisLabelFontSize;
     let ySpace = -yTickWidth;
     labelLines.reverse().forEach((line) => {
       barSvg.append("text")
@@ -135,15 +125,6 @@ const BottomBar = (props) => {
         .text(line);
       ySpace -= lineHeight;
     });
-
-    /*barSvg.append("text")
-      .attr("class", "yLabel")
-      .attr("text-anchor", "end")
-      .attr("y", -props.margin.left + 2* axisLabelFontSize) 
-      //.attr("dy", "-4em")
-      .attr("transform", "rotate(-90)")
-      .style("font-size", `${axisLabelFontSize}px`) 
-      .text("Characters reused"); */
       
     // update the tick font size
     barSvg

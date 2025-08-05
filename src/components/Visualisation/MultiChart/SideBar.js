@@ -24,7 +24,6 @@ const SideBar = (props) => {
     console.log("updating side bar");
     const tooltipDiv = d3.select(".vizTooltip");
     const barSvg = d3.select(".side-bar");
-    
 
     // build X axis scale:
     let maxTotalChMatch = d3.max(props.msStats, d => d.ch_match_total);
@@ -52,8 +51,6 @@ const SideBar = (props) => {
     barSvg.selectAll(".xLabel").remove();
     const lineHeight = axisLabelFontSize * 1.3;
     const labelLines = wrapTextToSvgWidth("Characters reused", 120, axisLabelFontSize);
-    console.log(labelLines);
-    //let ySpace = -props.margin.top + 2* axisLabelFontSize;
     let ySpace = -axisLabelFontSize;
     labelLines.reverse().forEach((line) => {
       barSvg.append("text")
@@ -64,14 +61,6 @@ const SideBar = (props) => {
         .text(line);
       ySpace -= lineHeight;
     });
-    /*barSvg.append("text")
-      .attr("class", "xLabel")
-      .attr("text-anchor", "middle")
-      .attr("x", 170-axisLabelFontSize)  // FIXME
-      .attr("dx", "-4em")
-      //.attr("y", height + 25)
-      .style("font-size", `${axisLabelFontSize}px`)
-      .text("Characters reused");*/
 
     // Add Y axis:
     barSvg.selectAll(".yAxis").remove();

@@ -275,21 +275,6 @@ const ScatterPlot = (props) => {
       props.height-visMargins.top, 
       axisLabelFontSize
     );
-    /*let space = lineHeight;
-    labelLines.reverse().forEach((line) => {
-      const x = space;
-      const y = 0; 
-      d3.select("#scatterChart").append("text")
-        .attr("class", "yLabel")
-        .attr("x", x)             
-        .attr("y", y)
-        .attr("text-anchor", "end")  // text will end at x,y
-        .attr("transform", `rotate(-90, ${x}, ${y})`)
-        .style("font-size", `${axisLabelFontSize}px`) 
-        .text(line);
-    });*/
-
-    
     let space = -yTickWidth;
     labelLines.reverse().forEach((line) => {
       // define the point where the text ends ("text-anchor", "end"): 
@@ -304,7 +289,7 @@ const ScatterPlot = (props) => {
         .attr("transform", `rotate(-90, ${x}, ${y})`)
         .style("font-size", `${axisLabelFontSize}px`) 
         .text(line);
-      space -= lineHeight;  // move the 
+      space -= lineHeight;  // move the next line to the left
     });
 
     if (showDownloadOptions){
