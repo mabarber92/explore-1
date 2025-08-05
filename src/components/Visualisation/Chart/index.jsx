@@ -7,7 +7,7 @@ import VisualizationHeader from "../SectionHeader/VisualizationHeader";
 import { Context } from "../../../App";
 import { extractAlignment } from "../../../functions/alignmentFunctions";
 import { getMilestoneText } from "../../../functions/getMilestoneText";
-import { getHighestValueInArrayOfObjects, wrapText, getMetaLabel } from "../../../utility/Helper";
+import { getHighestValueInArrayOfObjects, wrapTextToSvgWidth, getMetaLabel } from "../../../utility/Helper";
 import * as d3 from "d3";
 
 
@@ -40,7 +40,8 @@ const Visual = (props) => {
     axisLabelFontSize,
     tickFontSize,
     showDownloadOptions,
-    defaultMargins
+    defaultMargins,
+    yTickWidth
   } = useContext(Context);
 
   const [toggle, setToggle] = useState(false);
@@ -275,56 +276,63 @@ const Visual = (props) => {
           // in order to put the metadata along the Y axis,
           // we may need to break it into lines. 
 
-          // First we calculate the average number of characters
-          // we can fit in the space (the Y axis is 150px high):
-          const avgCharWidth = charHeight * 0.55;
-          const maxChars = Math.floor(200/avgCharWidth);
-
-          // using this measure, we break the metadata into lines: 
-          const labelLinesb1 = wrapText(textContentb1, maxChars);
-          const labelLinesb2 = wrapText(textContentb2, maxChars);
+          const labelLinesb1 = wrapTextToSvgWidth(textContentb1, 200, axisLabelFontSize);
+          const labelLinesb2 = wrapTextToSvgWidth(textContentb2, 200, axisLabelFontSize);
 
           // Add b1 metadata at the top of the Y axis:
-          let space = lineHeight;
-          labelLinesb1.forEach((textContent) => {
+          // define the starting space between the axis and the label
+          // (space = visMargins.left would put the text on the axis)
+          let space = visMargins.left - yTickWidth - lineHeight;
+          labelLinesb1.reverse().forEach((line) => {
+            // define the point where the text ends ("text-anchor", "end"): 
+            const x = space
+            const y = visMargins.top;  // center the rotation at the top of the Y axis
             svgD3.append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("x", -150 - visMargins.top)  // 150 being the size of the Y axis
-              .attr("y", space)  
-              .attr("text-anchor", "start")  
-              .style("font-size", `${axisLabelFontSize}px`)
-              .text(textContent);
-            space += lineHeight;
-          })
+              .attr("class", "yLabel")
+              .attr("text-anchor", "end") // text will end at x,y
+              .attr("x", x) 
+              .attr("y", y) 
+              // rotate the text around its end point:
+              .attr("transform", `rotate(-90, ${x}, ${y})`)
+              .style("font-size", `${axisLabelFontSize}px`) 
+              .text(line);
+            space -= lineHeight;  // move the 
+          });
 
           // Add b2 metadata at the bottom of the Y axis:
-          space = lineHeight;          
-          labelLinesb2.forEach((textContent) => {
+          space = visMargins.left - yTickWidth - lineHeight;
+          labelLinesb2.reverse().forEach((line) => {
+            // define the point where the text should start: 
+            const x = space
+            const y = visMargins.top + 450;  // center the rotation at the top of the Y axis
             svgD3.append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("x", -450 - visMargins.top) 
-              .attr("y", space)  
-              .attr("text-anchor", "start")  
-              .style("font-size", `${axisLabelFontSize}px`)
-              .text(textContent);
-            space += lineHeight;
-          })
+              .attr("class", "yLabel")
+              .attr("text-anchor", "start") // text will start at x,y
+              .attr("x", x) 
+              .attr("y", y) 
+              // rotate the text around its starting point:
+              .attr("transform", `rotate(-90, ${x}, ${y})`)
+              .style("font-size", `${axisLabelFontSize}px`) 
+              .text(line);
+            space -= lineHeight; // move the next line to the left
+          });
 
         } else {
 
           // Add b1 metadata at the top:
           svgD3.append("text")
             .attr("x", visMargins.left)             
-            .attr("y", includeURL ? 2.5*lineHeight : lineHeight)
+            //.attr("y", includeURL ? 2.5*lineHeight : lineHeight)
+            .attr("y", includeURL ? 3*axisLabelFontSize : axisLabelFontSize)
             .attr("text-anchor", "left")  
             .style("font-size", `${axisLabelFontSize}px`)
             .text(textContentb1);
 
-            // add b2 metadata at the bottom:
+          // add b2 metadata at the bottom:
           svgD3.append("text")
             .attr("x", visMargins.left)             
-            .attr("y", outerHeight)
-            .attr("dy", "-1em")
+            //.attr("y", outerHeight-lineHeight*2)
+            .attr("y", outerHeight-0.9*visMargins.bottom)
             .attr("text-anchor", "left")  
             .style("font-size", `${axisLabelFontSize}px`)
             .text(textContentb2);
