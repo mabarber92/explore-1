@@ -469,7 +469,15 @@ function bisectLeft(array, value) {
 	return low;
 }
 
-
+/**
+ * Get the width and height of a text
+ * if rendered at a specific font size and font in an svg
+ * 
+ * @param {String} text the text to be wrapped
+ * @param {Number} fontSize 
+ * @param {String} fontFamily 
+ * @returns {Object} boundingbox (x,y,width,height)
+ */
 function measureSvgText(text, fontSize, fontFamily=null) {
   // Create a temporary, hidden SVG
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -501,10 +509,10 @@ function measureSvgText(text, fontSize, fontFamily=null) {
 
 /**
  * Divide a text string into lines that are max. `maxWidth` wide
- * (based on svg measurement)
+ * (based on svg measurement - text in svg does not wrap automatically)
  * 
- * @param {String} text 
- * @param {Number} maxWidth 
+ * @param {String} text the text to be wrapped
+ * @param {Number} maxWidth width of the container that will contain the text
  * @param {Number} fontSize 
  * @param {String} fontFamily 
  * @returns 
@@ -535,62 +543,6 @@ function wrapTextToSvgWidth(text, maxWidth, fontSize, fontFamily=null) {
     lines.push(currentLine.trim());
   }
   return lines;
-}
-
-/*
- * wrap a string into lines based on a maximum 
- * number of characters per line
-*/
-function wrapText(text, maxChars) {
-  const lines = [];
-  let currentWord = "";
-  let currentLine = "";
-
-  for (let i=0; i<text.length; i++) {
-    const char = text[i];
-    currentWord += char
-    // use space or hyphen to delimit a word:
-    if (char === " " || char === "-") {
-      // If adding this word would exceed the limit
-      if ((currentLine + currentWord).trim().length > maxChars) {
-        if (currentLine.trim() !== "") {
-          // Push the current line and start a new one
-          lines.push(currentLine.trim());
-          currentLine = currentWord;
-        } else {
-          lines.push(currentWord);
-        }
-      } else {
-        // Otherwise, add the word to the current line
-        currentLine += currentWord;
-      }
-      currentWord = "";
-    } 
-  }
-
-  // Push the last word and line:
-  if ((currentLine + currentWord).trim().length <= maxChars) {
-    // if they fit in the available space, concatenate and add them:
-    lines.push((currentLine + currentWord).trim());
-  } else {
-    // if they don't fit, add them separately:
-    if (currentLine.trim() !== "") {
-      lines.push(currentLine.trim());
-    } 
-    lines.push(currentWord);
-  }
-
-  return lines;
-}
-
-/*
- * wrap a string into lines based on the available space 
- * and the font size
-*/
-function wrapTextToSpace(text, availableSpace, fontSize) {
-  const avgCharWidth = fontSize * 0.45;
-  const maxChars = Math.floor(availableSpace/avgCharWidth);
-  return wrapText(text, maxChars);
 }
 
 
@@ -634,7 +586,6 @@ export {
   getVersionIDfromURI,
   getVersionIDfromURL,
   buildPairwiseCsvURL,
-  wrapText,
   wrapTextToSvgWidth,
   loadChartFromUrl,
   getMetaLabel,
