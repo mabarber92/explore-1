@@ -64,7 +64,7 @@ const OutputDimensions = () => {
           <TextField
             label="Tick label size (px)"
             type="text"
-            value={tickFontSize}
+            value={tickFontSize || ""}
             onChange={(e) => setTickFontSize(parseInt(e.target.value) || 0)}
             sx={{ 
                 width: 120,
@@ -82,7 +82,7 @@ const OutputDimensions = () => {
           <TextField
             label="Axis label size (px)"
             type="text"
-            value={axisLabelFontSize}
+            value={axisLabelFontSize || ""}
             onChange={(e) => setAxisLabelFontSize(parseInt(e.target.value) || 0)}
             sx={{ 
                 width: 120,
