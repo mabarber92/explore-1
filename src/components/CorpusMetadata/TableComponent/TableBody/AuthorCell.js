@@ -13,14 +13,14 @@ const AuthorCell = ({ row, classes }) => {
           xs: "100%",
           md: "15%",
         },
+        border: "none",
         display: {
           xs: "flex",
           md: "block",
         },
         justifyContent: "space-between",
-        alignItems: "center",
-        border: "none",
         boxSizing: "border-box",
+        alignItems: "center",
       }}
     >
       <Stack spacing={0}>
