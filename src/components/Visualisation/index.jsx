@@ -230,7 +230,8 @@ const VisualisationPage = () => {
           // add some additional padding: 
           margins.left += lineHeight / 2;
         } 
-      } else {
+      } 
+      if (!isPairwiseViz) {
         // adjust the left margin in a one-to-many visualization
         // if the bottom bar's label needs to be split:
         const nLines = wrapTextToSvgWidth("Characters reused", 120, axisLabelFontSize).length;
