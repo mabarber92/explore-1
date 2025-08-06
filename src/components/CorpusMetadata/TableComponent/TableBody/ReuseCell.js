@@ -16,17 +16,18 @@ const ReuseCell = ({ classes, row }) => {
           md: "10%",
         },
         border: "none",
-        display: {
-          xs: "flex",
-          md: "block",
-        },
+        display: "flex",
         justifyContent: {
           xs: "space-between",
           md: "flex-end !important",
         },
         boxSizing: "border-box",
         alignItems: "center",
-        flexWrap: "wrap"
+        flexWrap: {
+          xs: "wrap",
+          md: "wrap",
+          lg: "nowrap"
+        }
       }}
     >
       <Tooltip
@@ -46,7 +47,7 @@ const ReuseCell = ({ classes, row }) => {
           size={"small"}
           color={"neutral"}
           sx={{
-            ml: "5px",
+            ml: "0px",
             fontSize: "16px",
             fontFamily: `Amiri,Roboto,"Helvetica Neue",Arial,sans-serif`,
             color: "rgba(0, 0, 0, 0.87)",
@@ -57,7 +58,14 @@ const ReuseCell = ({ classes, row }) => {
           {row?.release_version?.n_reuse_instances}
         </Typography>
       </Tooltip>
-      <Box sx={{ display: "flex", flexWrap: "nowrap", gap: 1 }}>
+      <Box 
+        sx={{ 
+          display: "flex", 
+          justifyContent: "center",
+          flexWrap: "nowrap", 
+          gap: 1 
+        }}
+      >
         <Tooltip
           placement="top"
           title={"View pairwise text reuse data and statistics"}
