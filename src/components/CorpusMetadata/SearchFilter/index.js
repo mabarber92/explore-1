@@ -121,11 +121,9 @@ const SearchFilters = ({ handleResetFilters, getQuery }) => {
     let newArr = [];
     for (let i = 0; i < arr.length; i++) {
       if (searchParams.has(arr[i]) && isExist(Object.keys(paramMappings)[i])) {
-        console.log("searchParams", searchParams.get(arr[i]));
         newArr = [...newArr, `${paramMappings[arr[i]]}: ${searchParams.get(arr[i])}`];
       }
     }
-    console.log("newArr", newArr);
     setAdvanceParams(newArr);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
