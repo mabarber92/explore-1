@@ -469,6 +469,103 @@ function bisectLeft(array, value) {
 	return low;
 }
 
+/**
+ * Get the width and height of a text
+ * if rendered at a specific font size and font in an svg
+ * 
+ * @param {String} text the text to be wrapped
+ * @param {Number} fontSize 
+ * @param {String} fontFamily 
+ * @returns {Object} boundingbox (x,y,width,height)
+ */
+function measureSvgText(text, fontSize, fontFamily=null) {
+  // Create a temporary, hidden SVG
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "0");
+  svg.setAttribute("height", "0");
+  svg.style.position = "absolute";
+  svg.style.visibility = "hidden";
+
+  // Create a text element
+  const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  textElement.setAttribute("x", "0");
+  textElement.setAttribute("y", "0");
+  textElement.style.fontSize = `${fontSize}px`;
+  if (fontFamily){
+    textElement.style.fontFamily = fontFamily;
+  }
+  textElement.textContent = text;
+
+  // Append and measure
+  svg.appendChild(textElement);
+  document.body.appendChild(svg);
+  const bbox = textElement.getBBox();
+
+  // Clean up
+  document.body.removeChild(svg);
+
+  return bbox;
+}
+
+/**
+ * Divide a text string into lines that are max. `maxWidth` wide
+ * (based on svg measurement - text in svg does not wrap automatically)
+ * 
+ * @param {String} text the text to be wrapped
+ * @param {Number} maxWidth width of the container that will contain the text
+ * @param {Number} fontSize 
+ * @param {String} fontFamily 
+ * @returns 
+ */
+function wrapTextToSvgWidth(text, maxWidth, fontSize, fontFamily=null) {
+  // split the text into words on space and hyphen (keeping both)
+  const words = text.split(/( |-)/);
+
+  // divide the text into lines:
+  const lines = [];
+  let currentLine = "";
+  for (let i=0; i<words.length; i++) {
+    const word = words[i];
+    // measure the line after adding the new word:
+    const lineWidth = measureSvgText(currentLine+word.trim(), fontSize, fontFamily).width;
+
+    if (lineWidth > maxWidth){
+      // if the line is now too long, finalize the line without the new word...
+      lines.push(currentLine.trim());
+      // ...and start a new line
+      currentLine = word;
+    } else {
+      currentLine += word
+    }
+  }
+  // Push the last line:
+  if (currentLine.trim().length > 0) {
+    lines.push(currentLine.trim());
+  }
+  return lines;
+}
+
+
+/*
+ * get the metadata label to be displayed
+ * in the pairwise visualisation
+ */
+function getMetaLabel(d, metaType) {
+  switch (metaType) {
+    case "author":
+      return d?.bookAuthor;
+    case "title":
+      return d?.bookTitle?.label;
+    case "author+title":
+      return `${d?.bookAuthor}, ${d?.bookTitle?.label}`;
+    case "versionCode":
+      return d?.versionCode;
+    default:
+      console.log("unexpected value: "+metaType);
+  }
+}
+
+
 export {
   getHighestValueInArrayOfObjects,
   calculateTooltipPos,
@@ -489,7 +586,10 @@ export {
   getVersionIDfromURI,
   getVersionIDfromURL,
   buildPairwiseCsvURL,
+  measureSvgText,
+  wrapTextToSvgWidth,
   loadChartFromUrl,
+  getMetaLabel,
   checkPairwiseCsvResponse,
   enableMockFetch
 };

@@ -13,11 +13,9 @@ import { setInitialValues } from "../../functions/setInitialValues";
 import { getVersionMeta } from "../../functions/getVersionMeta";
 import { setPairwiseVizData, setMultiVizData } from "../../functions/setVisualizationData";
 import { downloadCsvData, getOneBookReuseStats, getOneBookMsData } from "../../services/TextReuseData";
+import { getMetaLabel, measureSvgText, wrapTextToSvgWidth, checkPairwiseCsvResponse } from "../../utility/Helper";
 // import { lightSrtFolders, srtFoldersGitHub } from "../../assets/srtFolders";
 import { Context } from "../../App";
-import { checkPairwiseCsvResponse } from "../../utility/Helper";
-
-
 
 
 // Check the metadata response from a URL - return an array of failed books
@@ -126,6 +124,7 @@ const VisualisationPage = () => {
     setDataLoading,
     flipTimeLoading,
     setBooksAlignment,
+    metaData,
     setMetaData,
     setChartData,
     // loadedCsvFile,
@@ -141,6 +140,14 @@ const VisualisationPage = () => {
     setUrl,
     defaultReleaseCode,
     setMainVersionCode,
+    setVisMargins, 
+    defaultMargins, 
+    includeURL, 
+    includeMetaInDownload, 
+    metaPositionInDownload,
+    axisLabelFontSize,
+    tickFontSize, 
+    setYTickWidth
   } = useContext(Context);
 
   const [isPairwiseViz, setIsPairwiseViz] = useState(false);
@@ -148,6 +155,150 @@ const VisualisationPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { version } = useParams();
+
+  // update the margins of the graphs, based on 
+  // * label font size
+  // * tick font size
+  // * presence of metadata
+  // * presence of url
+  useEffect(() => {
+    const updateMargins = () => {
+      
+      // use the size of the axis and/or tick labels as default margins:
+      const margins = { top: 10, bottom: 10, left: 10, right: 10};
+
+      // calculate the height of a label line, based on the label font size:
+      const charHeight = axisLabelFontSize; // A for risers, g for descenders; does not matter, in fact
+      const lineHeight = 1.3 * charHeight;
+
+      // LEFT MARGIN: TICK LABELS + PADDING:
+      // The left margin consists of: 
+      // * the default margin: 10
+      // * the padding between the Y axis and the tick labels: 5
+      // * the space taken by the largest tick label
+      // * if axis labels are displayed: the height of the largest label 
+      //                                 (may be multiple lines if wrapped)
+
+
+      // 1. add space for some padding before and after the tick labels and the bar:
+      const tickPadding =  5; // 5 is used as padding between axis and tick label
+      margins.left += tickPadding;
+
+      // 2. adjust the left margin to the size of the largest tick label: 
+      if (isPairwiseViz) {
+        // in pairwise viz, the largest tick label is 300:
+        const tickWidth300 = measureSvgText("300", tickFontSize).width;
+        margins.left += tickWidth300;
+        setYTickWidth(tickWidth300);
+      } else {
+        // in one-to-many viz, there are two sets of tick labels: 
+        // milestone numbers (top) and total number of reused characters (bottom)
+        
+        // milestone numbers: 
+        const lastMs = Math.ceil(chartData?.tokens?.first / 300)
+        const lastMsWidth = measureSvgText(lastMs, tickFontSize).width;
+
+        // total number of reused characters in a book:
+        const highestBookReuse = chartData?.maxTotalChMatch;
+        const highestBookReuseWidth = measureSvgText(highestBookReuse, tickFontSize).width;
+
+        const largestTickWidth = Math.max(lastMsWidth, highestBookReuseWidth);
+        margins.left += largestTickWidth;        
+        setYTickWidth(largestTickWidth);
+      }
+
+      // LEFT MARGIN: AXIS LABELS:
+
+      if (isPairwiseViz && includeMetaInDownload !== "no") {        
+        if (metaPositionInDownload === "left") {
+          // in order to put the metadata along the Y axis,
+          // we may need to break it into lines. 
+
+          // Calculate into how many lines we will have to break 
+          // (the longest of) the labels:
+          const b1Label = getMetaLabel(metaData.book1, includeMetaInDownload);
+          const b2Label = getMetaLabel(metaData.book2, includeMetaInDownload);
+          const longestLabel = [b1Label, b2Label].sort((a, b) =>{
+            return b.length - a.length
+          })[0];
+
+          const nLines = wrapTextToSvgWidth(longestLabel, 200, axisLabelFontSize).length;
+
+          // add margin space for the required number of lines:
+          margins.left += nLines * lineHeight;
+
+          // add some additional padding: 
+          margins.left += lineHeight / 2;
+        } 
+      } 
+      if (!isPairwiseViz) {
+        // adjust the left margin in a one-to-many visualization
+        // if the bottom bar's label needs to be split:
+        const nLines = wrapTextToSvgWidth("Characters reused", 120, axisLabelFontSize).length;
+        margins.left += nLines*lineHeight;
+        // add some additional padding: 
+        margins.left += lineHeight / 2;
+      }
+
+      // TOP MARGIN: 
+
+      // make space for the URL at the top of the graph, if user wants to include it:
+      if (includeURL) {
+        margins.top += 1.5*lineHeight;
+      }
+
+      // update the top margin of the pairwise graph in case user wants to include metadata there:
+      if (isPairwiseViz && includeMetaInDownload !== "no" && metaPositionInDownload !== "left") {
+        margins.top += lineHeight;
+      }
+
+      // update the top margin of the one-to-many graph if the sidebar's X label needs to be wrapped:
+      if (!isPairwiseViz){
+        const nLines = wrapTextToSvgWidth("Characters reused", 120, axisLabelFontSize).length;
+        margins.top += nLines * lineHeight;
+      }
+
+      // BOTTOM MARGIN: 
+
+      // update the top margin of the pairwise graph in case user wants to include metadata there:
+      if (isPairwiseViz && includeMetaInDownload !== "no" && metaPositionInDownload !== "left") {
+        margins.bottom += 2*lineHeight;
+      } 
+      
+      if (!isPairwiseViz) {
+        // adjust the bottom margin based on the tick font size: 
+        margins.bottom += tickFontSize;
+
+        // adjust the bottom margin of the one-to-many viz 
+        // based on label font size (taking into account that it may be wrapped):
+        let bottomLabelText = "Books for which passim detected text reuse with "
+        bottomLabelText += metaData?.book1?.bookTitle?.path || "";
+        bottomLabelText += " (chronologically arranged)";
+        const nLabelLines = wrapTextToSvgWidth(
+          bottomLabelText, 
+          1000 - margins.left - margins.right, 
+          axisLabelFontSize
+        ).length;
+        margins.bottom += nLabelLines * lineHeight;
+      }
+
+      setVisMargins(margins);
+      console.log(margins);
+    };
+    updateMargins();
+  }, [
+    chartData,
+    setVisMargins, 
+    defaultMargins, 
+    includeURL, 
+    includeMetaInDownload, 
+    metaPositionInDownload,
+    axisLabelFontSize,
+    tickFontSize,
+    metaData, 
+    isPairwiseViz,
+    setYTickWidth
+  ]);
 
   const handleUpload = async (upload) => {
     setInitialValues({

@@ -7,7 +7,7 @@ import VisualizationHeader from "../SectionHeader/VisualizationHeader";
 import { Context } from "../../../App";
 import { extractAlignment } from "../../../functions/alignmentFunctions";
 import { getMilestoneText } from "../../../functions/getMilestoneText";
-import { getHighestValueInArrayOfObjects } from "../../../utility/Helper";
+import { getHighestValueInArrayOfObjects, wrapTextToSvgWidth, getMetaLabel } from "../../../utility/Helper";
 import * as d3 from "d3";
 
 
@@ -31,7 +31,17 @@ const Visual = (props) => {
     downloadedTexts,
     setDownloadedTexts,
     releaseCode,
-    setTextAvailable
+    setTextAvailable,
+    visMargins, 
+    includeURL, 
+    includeMetaInDownload, 
+    metaPositionInDownload, 
+    url,
+    axisLabelFontSize,
+    tickFontSize,
+    showDownloadOptions,
+    defaultMargins,
+    yTickWidth
   } = useContext(Context);
 
   const [toggle, setToggle] = useState(false);
@@ -54,7 +64,7 @@ const Visual = (props) => {
     },
   });
 
-  console.log(chartData);
+  //console.log(chartData);
 
   var clipPathId = "clipDrawing";
   var clipPath = "url('#clipDrawing')";
@@ -66,7 +76,8 @@ const Visual = (props) => {
     clipRect,
     x0ScaleNode,
     x1ScaleNode,
-    outerHeight = 530,
+    startOuterHeight = 530,
+    outerHeight,
     outerWidth,
     innerHeight,
     innerWidth,
@@ -83,18 +94,9 @@ const Visual = (props) => {
     hoverStrokeWidth = 3,
     selectedLine = null;
 
-  var margin = {
-      top: 40,
-      right: 20,
-      bottom: 20,
-      left: 60,
-    },
-    padding = {
-      top: 40,
-      right: 0,
-      bottom: 40,
-      left: 40,
-    };
+  // set the dimensions and margins of the graph
+  //var margin =  { top: 40, right: 20, bottom: 20, left: 60 };
+  var padding = { top: 40, right: 0,  bottom: 40, left: 40 };
 
   var book1Bars, connections, book2Bars, brushG;
   var xScale, xScaleIdentity, x0Axis, x1Axis;
@@ -120,7 +122,7 @@ const Visual = (props) => {
     lastMsSecond = getHighestValueInArrayOfObjects(chartData.dataSets, "seq2");
     showBookEnd2 = false;
   }
-  console.log(`showBookEnd1: ${showBookEnd1}, showBookEnd2: ${showBookEnd2}`);
+  //console.log(`showBookEnd1: ${showBookEnd1}, showBookEnd2: ${showBookEnd2}`);
 
 
   var maxValues = {
@@ -187,24 +189,35 @@ const Visual = (props) => {
 
   function setLayout() {
     outerWidth = chartBox.offsetWidth;
-    innerWidth = outerWidth - margin.left - margin.right;
-    innerHeight = outerHeight - margin.top - margin.bottom;
+    innerWidth = outerWidth - visMargins.left - visMargins.right;
+    //const minMargin = Math.max(axisLabelFontSize, tickFontSize);
+    outerHeight = startOuterHeight + visMargins.top + visMargins.bottom - defaultMargins.top - defaultMargins.bottom;
+    //outerHeight = startOuterHeight
+    innerHeight = outerHeight - visMargins.top - visMargins.bottom;
     width = innerWidth - padding.left - padding.right;
     height = innerHeight - 20;
+    //height = innerHeight;
+    console.log(`outerWidth: ${outerWidth}`);
+    console.log(`innerWidth: ${innerWidth}`);
+    console.log(`outerHeight: ${outerHeight}`);
+    console.log(`innerHeight: ${innerHeight}`);
+    console.log(`width: ${width}`);
+    console.log(`height: ${height}`);
+    console.log(visMargins);
 
     svgD3.attr("width", outerWidth - 30).attr("height", outerHeight);
 
     drawingG.attr(
       "transform",
-      "translate(" + margin.left + "," + margin.top + ")"
+      "translate(" + visMargins.left + "," + visMargins.top + ")"
     );
     brushG.attr(
       "transform",
-      "translate(" + margin.left + "," + margin.top + ")"
+      "translate(" + visMargins.left + "," + visMargins.top + ")"
     );
     marksG.attr(
       "transform",
-      "translate(" + margin.left + "," + margin.top + ")"
+      "translate(" + visMargins.left + "," + visMargins.top + ")"
     );
     book2Bars.attr("transform", "translate(0,300)");
 
@@ -233,7 +246,101 @@ const Visual = (props) => {
       { x: barMaxHeight, y: 0, yScale: y0Scale, visible: false },
       { x: barMaxHeight, y: barMaxHeight * 2, yScale: y0Scale, visible: false },
     ];
+
+    // update the tick font size: 
+    d3.selectAll("#chartBox .axis .tick text")
+      .style("font-size", `${tickFontSize}px`);
+
+    // update the margins of the graph:
+
+    if (showDownloadOptions){
+      const charHeight = axisLabelFontSize;
+      const lineHeight = charHeight * 1.3;
+      if (includeURL) {
+        svgD3.append("text")
+          .attr("x", visMargins.left)             
+          .attr("y", lineHeight)
+          .attr("text-anchor", "left")  
+          .style("font-size", `${axisLabelFontSize}px`)
+          .style("text-decoration", "underline")  
+          .text(window.location.origin + url);
+      } 
+      if (includeMetaInDownload !== "no") {
+        // get the metadata to be displayed for each book:
+        const b1 = isFlipped ? metaData?.book2 : metaData?.book1;
+        const b2 = isFlipped ? metaData?.book1 : metaData?.book2;
+        let textContentb1 = getMetaLabel(b1, includeMetaInDownload);
+        let textContentb2 = getMetaLabel(b2, includeMetaInDownload);
+        
+        if (metaPositionInDownload === "left") {
+          // in order to put the metadata along the Y axis,
+          // we may need to break it into lines. 
+
+          const labelLinesb1 = wrapTextToSvgWidth(textContentb1, 200, axisLabelFontSize);
+          const labelLinesb2 = wrapTextToSvgWidth(textContentb2, 200, axisLabelFontSize);
+
+          // Add b1 metadata at the top of the Y axis:
+          // define the starting space between the axis and the label
+          // (space = visMargins.left would put the text on the axis)
+          let space = visMargins.left - yTickWidth - lineHeight;
+          labelLinesb1.reverse().forEach((line) => {
+            // define the point where the text ends ("text-anchor", "end"): 
+            const x = space
+            const y = visMargins.top;  // center the rotation at the top of the Y axis
+            svgD3.append("text")
+              .attr("class", "yLabel")
+              .attr("text-anchor", "end") // text will end at x,y
+              .attr("x", x) 
+              .attr("y", y) 
+              // rotate the text around its end point:
+              .attr("transform", `rotate(-90, ${x}, ${y})`)
+              .style("font-size", `${axisLabelFontSize}px`) 
+              .text(line);
+            space -= lineHeight;  // move the 
+          });
+
+          // Add b2 metadata at the bottom of the Y axis:
+          space = visMargins.left - yTickWidth - lineHeight;
+          labelLinesb2.reverse().forEach((line) => {
+            // define the point where the text should start: 
+            const x = space
+            const y = visMargins.top + 450;  // center the rotation at the top of the Y axis
+            svgD3.append("text")
+              .attr("class", "yLabel")
+              .attr("text-anchor", "start") // text will start at x,y
+              .attr("x", x) 
+              .attr("y", y) 
+              // rotate the text around its starting point:
+              .attr("transform", `rotate(-90, ${x}, ${y})`)
+              .style("font-size", `${axisLabelFontSize}px`) 
+              .text(line);
+            space -= lineHeight; // move the next line to the left
+          });
+
+        } else {
+
+          // Add b1 metadata at the top:
+          svgD3.append("text")
+            .attr("x", visMargins.left)             
+            //.attr("y", includeURL ? 2.5*lineHeight : lineHeight)
+            .attr("y", includeURL ? 3*axisLabelFontSize : axisLabelFontSize)
+            .attr("text-anchor", "left")  
+            .style("font-size", `${axisLabelFontSize}px`)
+            .text(textContentb1);
+
+          // add b2 metadata at the bottom:
+          svgD3.append("text")
+            .attr("x", visMargins.left)             
+            //.attr("y", outerHeight-lineHeight*2)
+            .attr("y", outerHeight-0.9*visMargins.bottom)
+            .attr("text-anchor", "left")  
+            .style("font-size", `${axisLabelFontSize}px`)
+            .text(textContentb2);
+        }      
+      }
+    } 
   }
+
 
   function drawChart() {
     // - Hover Lines ::
@@ -379,7 +486,8 @@ const Visual = (props) => {
       .attr("x", -5)
       .attr("y", -5)
       .attr("transform", "rotate(-90)")
-      .style("text-anchor", "end");
+      .style("text-anchor", "end")
+      .style("font-size", `${tickFontSize}px`);
 
     // - render X Axis of Book2 ::
     x1Axis.tickValues(
@@ -392,7 +500,8 @@ const Visual = (props) => {
       .attr("x", 5)
       .attr("y", 2)
       .attr("transform", "rotate(-90)")
-      .style("text-anchor", "start");
+      .style("text-anchor", "start")
+      .style("font-size", `${tickFontSize}px`);
 
     // - render Reference Lines Min and Max ::
     marksG
@@ -890,6 +999,12 @@ const Visual = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFlipped]);
+
+  // redraw the chart when the margins change
+  useEffect(() => {
+    normalChart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visMargins, axisLabelFontSize, tickFontSize, showDownloadOptions, includeURL]);
 
   return (
     <>

@@ -389,6 +389,7 @@ export const setMultiVizData = (values) => {
                   msStats: msStats,
                   msBooks: msBooks,
                   bookStats: stats,
+                  maxTotalChMatch: getHighestValueInArrayOfObjects(stats, "ch_match"),
                   bookIndexDict: bookIndexDict,
                   bookUriDict: bookUriDict,
                   /*filteredMsData: msData,
@@ -396,6 +397,7 @@ export const setMultiVizData = (values) => {
                 filteredBookStats: stats*/
                   //dataSets: []
                 });
+                console.log(getHighestValueInArrayOfObjects(stats, "ch_match"));
                 setIsError(false);
                 setDataLoading({ ...dataLoading, chart: false });
                 const url = `/visualise/${releaseCode}/?books=${book1?.version_code}_all`;
