@@ -96,7 +96,6 @@ const TextReuseTable = ({ b1Metadata, normalizedQuery, handleRedirectToChart, b1
             book_lc: rest.book.toLowerCase()
           }));
           setStatsData(stats);
-          console.log("Stats data loaded: ");
         }
       });
     };
